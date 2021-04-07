@@ -69,7 +69,7 @@ $ git config --global user.email  "244167780@qq.com"
 `ssh-keygen`绑定SSH公匙
 
 ```shell
-$ ssh-keygen
+$ ssh-keygen -t rsa 
 Generating public/private rsa key pair.
 Enter file in which to save the key (/c/Users/Admin/.ssh/id_rsa):
 Enter passphrase (empty for no passphrase):
@@ -94,7 +94,7 @@ The key's randomart image is:
 
 > C:\Users\Admin\.ssh\id_rsa.pub中生成SHA256公匙。将公匙复制到GitHub的setting中，来绑定本地电脑。
 
-![image-20210407143451407](C:\Users\Admin\AppData\Roaming\Typora\typora-user-images\image-20210407143451407.png)
+![image-20210407143543816](C:\Users\Admin\AppData\Roaming\Typora\typora-user-images\image-20210407143543816.png)
 
 
 
@@ -114,6 +114,93 @@ The key's randomart image is:
    $ git clone [url]
    ```
 
-3. 
+3. 查看工作文件夹中的文件状态(有新增文件Untracked files)
 
-4. 
+   ```shell
+    $ git status [filename]
+    On branch master
+   Your branch is up to date with 'origin/master'.
+   
+   Untracked files:
+     (use "git add <file>..." to include in what will be committed)
+           "Git\345\255\246\344\271\240.md"
+   
+   nothing added to commit but untracked files present (use "git add" to track)
+   
+   ```
+
+4. 添加文件
+
+   ```shell
+   $ git add .
+   ```
+
+5. 再次查看文件状态（Changes to be committed）
+
+   ```shell
+   $ git status
+   On branch master
+   Your branch is up to date with 'origin/master'.
+   
+   Changes to be committed:
+     (use "git restore --staged <file>..." to unstage)
+           new file:   "Git\345\255\246\344\271\240.md"
+   
+   ```
+
+6. 提交到本地仓库
+
+   ```shell
+   $ git commit -m "commit message"
+   [master 7665630] commit message
+    1 file changed, 119 insertions(+)
+    create mode 100644 "Git\345\255\246\344\271\240.md"
+   
+   ```
+
+7. 查看文件状态(nothing to commit)
+
+   ``` shell
+   $ git status
+   On branch master
+   Your branch is ahead of 'origin/master' by 1 commit.
+     (use "git push" to publish your local commits)
+   
+   nothing to commit, working tree clean
+   
+   ```
+
+8. Push到远程仓库
+
+   ```shell
+   $ git push
+   Enumerating objects: 4, done.
+   Counting objects: 100% (4/4), done.
+   Delta compression using up to 8 threads
+   Compressing objects: 100% (3/3), done.
+   Writing objects: 100% (3/3), 1.67 KiB | 1.67 MiB/s, done.
+   Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+   To github.com:NPU-FanZhang/JavaNote.git
+      9a7a3c8..7665630  master -> master
+   
+   ```
+
+9. Pull从远程仓库更新（Pull）
+
+   ``` shell
+   $ git pull
+   Already up to date.
+   ```
+
+10. sd
+
+    ``` 
+    
+    
+    
+    ```
+
+11. 
+
+
+
