@@ -192,15 +192,10 @@ The key's randomart image is:
    Already up to date.
    ```
 
-10. sd
+10. 下次打开项目前，进行远程仓库更新（Pull）
 
-    ``` 
-    
-    
-    
+    ```shell
+    $ git pull
+    Already up to date.
     ```
-
-11. 
-
-
 
