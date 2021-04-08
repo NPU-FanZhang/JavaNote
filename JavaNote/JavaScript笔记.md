@@ -25,6 +25,26 @@ Infinity - 无穷大
 
 `String`
 
+``` javascript
+    // ` 可以实现多行字符串
+    var str = `sasd
+                asd`
+    //模板字符串
+    var name = "0.0"
+    let a = `you are ${name}`
+    console.log(a)//you are 0.0
+	
+	//字符串可变性
+    let student = "stuDent"
+    student[0] = 1
+    console.log(student)//stuDent string说明不可变
+
+    console.log(student.toLowerCase())//student
+    console.log(student.toUpperCase())//STUDENT
+    console.log(student.indexOf('t'))//1
+    console.log(student.substring(1,3))//tu
+```
+
 `Boolean`
 
 > 只有`true  ` `false`
@@ -64,3 +84,8 @@ var Person = {
 }
 ```
 
+## 变量 `var`与`let`
+
+> `ES5`之前使用`var`定义局部变量，`ES6`之后推荐使用`let`
+>
+> 严格检查模式只需要在代码第一行加上 `use strict`（ES6）

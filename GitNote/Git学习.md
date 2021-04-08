@@ -11,7 +11,7 @@
 - 仓库区（Repository）
 - 远程仓库（Remote）
 
-![image-20210407140840726](C:\Users\Admin\AppData\Roaming\Typora\typora-user-images\image-20210407140840726.png)
+![](Git学习.assets/image-20210407140840726.png)
 
 
 
@@ -94,7 +94,7 @@ The key's randomart image is:
 
 > C:\Users\Admin\.ssh\id_rsa.pub中生成SHA256公匙。将公匙复制到GitHub的setting中，来绑定本地电脑。
 
-![image-20210407143543816](C:\Users\Admin\AppData\Roaming\Typora\typora-user-images\image-20210407143543816.png)
+![image-20210407143543816](Git学习.assets/image-20210407143543816.png)
 
 
 
