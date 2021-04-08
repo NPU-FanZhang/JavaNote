@@ -334,8 +334,8 @@ System.out.println(declaredConstructor);
 > 1. 先获得`class对象`
 > 2. 这个`class对象`通过`newInstance` 创建一个对应类的对象
 > 3. 通过`class对象`的`getDeclaredMethod` `getDeclaredField`方法来获得方法和属性
-> 4. 通过`invoke` set`来激活方法`
-> 5. 调用方法
+> 4. 通过`invoke` `set`来激活方法和设置属性
+> 5. 调用方法和属性
 
 ```java
 public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
@@ -365,5 +365,164 @@ public static void main(String[] args) throws ClassNotFoundException, IllegalAcc
     name.setAccessible(true);
     name.set(fan,"fan");
     System.out.println(fan.getName());//fan
+}
+```
+
+### 反射的性能分析
+
+```java
+public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    test01();//普通方式 10亿执行时间:4ms
+    test02();//反射方式 10亿执行时间:2745ms
+    test03();//反射关闭检测 10亿执行时间:1132ms
+}
+//普通
+public static void test01(){
+    Person person = new Person();
+    long startTime = System.currentTimeMillis();
+    for (int i = 0; i < 10_0000_0000; i++) {
+        person.getName();
+    }
+    long endTime = System.currentTimeMillis();
+    System.out.println("10亿执行时间:" + (endTime - startTime) + "ms");
+}
+//反射
+public static void test02() throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    Class aClass = Class.forName("com.Reflect.Person");
+    Person person = (Person) aClass.newInstance();
+    Method getName = aClass.getDeclaredMethod("getName", null);
+    //Person person = new Person();
+    long startTime = System.currentTimeMillis();
+    for (int i = 0; i < 10_0000_0000; i++) {
+        getName.invoke(person,null);
+    }
+    long endTime = System.currentTimeMillis();
+    System.out.println("10亿执行时间:" + (endTime - startTime) + "ms");
+}
+//关闭检查
+public static void test03() throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    Class aClass = Class.forName("com.Reflect.Person");
+    Person person = (Person) aClass.newInstance();
+    Method getName = aClass.getDeclaredMethod("getName", null);
+    //Person person = new Person();
+    getName.setAccessible(true);
+    long startTime = System.currentTimeMillis();
+    for (int i = 0; i < 10_0000_0000; i++) {
+        getName.invoke(person,null);
+    }
+    long endTime = System.currentTimeMillis();
+    System.out.println("10亿执行时间:" + (endTime - startTime) + "ms");
+}
+```
+
+
+
+### 反射操作泛型
+
+```java
+//通过反射获取泛型
+public class Test1 {
+    //泛型做参数
+    public void test01(Map<String ,Person> map, List<Person> list){
+        System.out.println("T01");
+    }
+    //泛型做返回值
+    public Map<String,Person> test02(){
+        System.out.println("T02");
+        return null;
+    }
+
+    public static void main(String[] args) throws NoSuchMethodException {
+        Method test01 = Test1.class.getMethod("test01", Map.class, List.class);
+        Type[] genericParameterTypes = test01.getGenericParameterTypes();
+        for (Type genericParameterType : genericParameterTypes) {
+            System.out.println("-----"+genericParameterType);
+            /*
+            java.util.Map<java.lang.String, com.Reflect.Person>
+            java.util.List<com.Reflect.Person>
+             */
+            System.out.println("----------");
+            //ParameterizedType-参数化类型
+            if (genericParameterType instanceof ParameterizedType)
+            {
+                Type[] actualTypeArguments = ((ParameterizedType) genericParameterType).getActualTypeArguments();//getActualTypeArguments真实参数类型
+                /*java.util.Map<java.lang.String, com.Reflect.Person>
+                class java.lang.String
+                class com.Reflect.Person
+                 */
+                /*java.util.List<com.Reflect.Person>
+                class com.Reflect.Person
+                 */
+                for (Type actualTypeArgument : actualTypeArguments) {
+                    System.out.println(actualTypeArgument);
+                }
+            }
+        }
+
+        Method test02 = Test1.class.getMethod("test02",null);
+        Type test02ReturnType = test02.getReturnType();
+        System.out.println(test02ReturnType);//interface java.util.Map
+
+    }
+}
+```
+
+### 反射操作注解
+
+注解的定义和使用：
+
+```java
+@TableName("ZhangFanTable")
+class student{
+    @FieldName(columnName = "db_id",type = "int",length = 10)
+    private int id;
+    @FieldName(columnName = "db_age",type = "int",length = 10)
+    private int age;
+    @FieldName(columnName = "db_name",type = "varChar",length = 10)
+    private String name;
+
+    public student() {
+    }
+}
+
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@interface TableName{
+    String value();
+}
+//属性的注解
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+@interface FieldName{
+    String columnName();
+    String type();
+    int length();
+
+}
+```
+
+如何使用反射操作注解：
+
+```java
+public static void main(String[] args) throws ClassNotFoundException, NoSuchFieldException {
+
+    Class aClass = Class.forName("com.Reflect.student");
+    //反射获得注解
+    Annotation[] annotations = aClass.getAnnotations();
+    for (Annotation annotation : annotations) {
+        System.out.println(annotation);//@com.Reflect.TableName(value="ZhangFanTable")
+    }
+    //获得类注解的value值
+    TableName tableName = (TableName)aClass.getAnnotation(TableName.class);
+    System.out.println(tableName.value());//ZhangFanTable
+    //获取属性的注解
+    Field name = aClass.getDeclaredField("name");
+    FieldName annotation = name.getAnnotation(FieldName.class);
+
+    System.out.println(annotation);//@com.Reflect.FieldName(columnName="db_name", type="varChar", length=10)
+    System.out.println(annotation.columnName());//db_name
+    System.out.println(annotation.length());//10
+    System.out.println(annotation.type());//varChar
+
 }
 ```
