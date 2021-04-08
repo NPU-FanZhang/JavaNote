@@ -2,6 +2,8 @@
 
 
 
+[TOC]
+
 ## 面向对象
 
 > OOP(Object-Oriented Programming)
