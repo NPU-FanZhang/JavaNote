@@ -55,6 +55,14 @@ public void test(){
 
 ## 反射机制Reflection
 
+> 反射机制是在运行状态中，
+>
+> 对于任意一个类，都能够知道这个类的所有属性和方法；
+>
+> 对于任意一个对象，都能够调用它的任意一个方法和属性；
+>
+> 这种动态获取的信息以及动态调用对象的方法的功能称为java语言的反射机制。
+
 > 可以实现代码的动态编译，但是会牺牲性能。
 >
 > 由于class文件的字节码内容加载到内存中，并将静态数据转换成方法区的运行时数据结构，然后生成一个代表这个类的`Java.lang.Class`对象，因此**Class对象只能获取**，因为它是加载到内存之中才形成的。
@@ -160,7 +168,7 @@ System.out.println(b.getClass().hashCode());//317574433
 System.out.println(c.getClass().hashCode());//885284298
 ```
 
-## 类内存加载机制
+### 类内存加载机制
 
 > 类加载顺序主要为: 加载--> 链接 --> 初始化
 
@@ -205,7 +213,7 @@ class A{
 }
 ```
 
-## 类初始化
+### 类初始化
 
 > 类会初始化的情况
 >
@@ -223,7 +231,7 @@ class A{
 
 
 
-## 类加载器
+### 类加载器
 
 ```java
 public class Loader {
@@ -254,3 +262,108 @@ public class Loader {
 }
 ```
 
+
+
+### 类对象的结构
+
+> 可以获得类的名称、方法、属性、以及构造器等等。
+
+```java
+//获取Class对象的属性
+Class aClass = Class.forName("com.company.Person");
+System.out.println(aClass.getName());//com.company.Person
+System.out.println(aClass.getSimpleName());//Person
+//获得类的属性
+Field[] fields = aClass.getFields();//只能找到public属性
+System.out.println("------------");
+fields = aClass.getDeclaredFields();
+for (Field field : fields) {
+    System.out.println(field);
+    //输出：
+    //java.lang.String com.company.Person.name
+    //int com.company.Person.age
+    //char com.company.Person.gender
+}
+//获取指定的属性
+Field name = aClass.getDeclaredField("name");
+System.out.println(name);
+//java.lang.String com.company.Person.name
+//获取类的方法
+System.out.println("===================");
+Method[] methods = aClass.getMethods();//获得本类及其父类的全部public方法
+for (Method method : methods) {
+    System.out.println(method);
+}
+//public java.lang.String com.company.Person.toString()
+//public final native void java.lang.Object.wait(long) throws java.lang.InterruptedException
+//public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+//public final void java.lang.Object.wait() throws java.lang.InterruptedException
+//public boolean java.lang.Object.equals(java.lang.Object)
+//public native int java.lang.Object.hashCode()
+//public final native java.lang.Class java.lang.Object.getClass()
+//public final native void java.lang.Object.notify()
+//public final native void java.lang.Object.notifyAll()
+
+System.out.println("----------");//获得本类的方法
+methods = aClass.getDeclaredMethods();
+for (Method method : methods) {
+    System.out.println(method);
+}
+//public java.lang.String com.company.Person.toString()
+
+//获取指定的方法
+System.out.println("++++++++++++++++++++++++++");
+//由于方法存在重载，所以获得指定方法时需要指定参数列表，即除过方法名外的第二个参数
+Method methods1 = aClass.getMethod("toString",null);
+System.out.println(methods1);
+//public java.lang.String com.company.Person.toString()
+
+//获得构造器
+Constructor[] constructors = aClass.getConstructors();
+Constructor[] declaredConstructors = aClass.getDeclaredConstructors();
+Constructor declaredConstructor = aClass.getDeclaredConstructor(String.class, int.class, char.class);
+
+System.out.println(declaredConstructor);
+//public com.company.Person(java.lang.String,int,char)
+```
+
+
+
+### 动态创建对象（即通过类对象创建对象）
+
+> 1. 先获得`class对象`
+> 2. 这个`class对象`通过`newInstance` 创建一个对应类的对象
+> 3. 通过`class对象`的`getDeclaredMethod` `getDeclaredField`方法来获得方法和属性
+> 4. 通过`invoke` set`来激活方法`
+> 5. 调用方法
+
+```java
+public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
+    //获得class对象
+    Class c1 = Class.forName("com.Reflect.Person");
+    //构造一个对象
+    Person person = (Person) c1.newInstance();//本质调用无参构造器, 没有无参构造器会报错
+    System.out.println(person);//Person{name='null', age=0, gender= }
+
+    //通过构造器构造对象
+    Constructor declaredConstructor = c1.getDeclaredConstructor(String.class, int.class, char.class);
+    Person zhang = (Person) declaredConstructor.newInstance("Zhang", 15, '男');
+    System.out.println(zhang);//Person{name='Zhang', age=15, gender=男}
+
+    //通过反射获取方法
+    Method toString = c1.getDeclaredMethod("toString", null);
+
+    //invoke-激活,反射获取的方法要激活才能使用
+    toString.invoke(zhang,null);
+    System.out.println(zhang.toString());//Person{name='Zhang', age=15, gender=男}
+
+    //反射操作属性,不能直接操作私有属性，得关闭权限检查
+    Person fan = (Person) c1.newInstance();
+    Field name = c1.getDeclaredField("name");
+    //关闭权限检查，不然对private属性访问会报错
+    //cannot access a member of class com.Reflect.Person with modifiers "private"
+    name.setAccessible(true);
+    name.set(fan,"fan");
+    System.out.println(fan.getName());//fan
+}
+```
