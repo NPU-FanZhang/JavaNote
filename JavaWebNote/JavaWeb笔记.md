@@ -4,3 +4,6 @@
 
 [TOC]
 
+## Web请求流程
+
+![image-20210408210005403](JavaWeb笔记.assets/image-20210408210005403.png)
