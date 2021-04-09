@@ -173,6 +173,8 @@ HTTP状态码共分为5种类型：
 
 ## Maven
 
+> Maven 约定 < 配置
+>
 > 为什么使用Maven技术?
 >
 > ​		JavaWeb开发过程中,常常要导入很多jar包, 需要我们手动导入; Maven就是项目架构管理工具 
@@ -239,6 +241,149 @@ HTTP状态码共分为5种类型：
    ```xml
    <localRepository>D:\apache-maven-3.8.1\maven-repo</localRepository>
    ```
+
+   
+
+### 创建Maven项目
+
+> 可以选择模板Maven项目,也可以创建一个空的Maven项目,这里创建的是一个模板项目
+
+1. 新建模板Maven项目
+
+   ![image-20210409164653526](JavaWeb笔记.assets/image-20210409164653526.png)
+
+2. 选择自己配置的xml和仓库
+
+   ![image-20210409164838073](JavaWeb笔记.assets/image-20210409164838073.png)
+
+3. 等待下载仓库中的jar包等
+
+   ![image-20210409164519819](JavaWeb笔记.assets/image-20210409164519819.png)
+
+   ------
+
+   - 新建maven项目时，Run中报警告：`No archetype found in remote catalog. Defaulting to internal catalog.`【在远程目录中没有找到原型。默认为内部编录。】
+
+     ​		可以不用管【因为使用了maven模版构建项目，要从网上获取模版，然而没有找到这个模版或者网络慢，导致获取失败 】，选择File ---> 再选择Close Project，关闭项目后重启就可以了。
+
+4. 初始化完毕
+
+   检查一下设置:
+
+   <img src="JavaWeb笔记.assets/image-20210409165928801.png" alt="image-20210409165928801" style="zoom:50%;" />
+
+5. 空项目的初始目录如下:
+
+   ![image-20210409170710986](JavaWeb笔记.assets/image-20210409170710986.png)
+
+
+
+### IDEA配置Tomcat
+
+1. 添加Tomcat启动
+
+   ![image-20210409171618212](JavaWeb笔记.assets/image-20210409171618212.png)
+
+2. 配置Tomcat
+
+   ![image-20210409172031403](JavaWeb笔记.assets/image-20210409172031403.png)
+   
+3. 运行Tomcat
+
+   ![image-20210409173248163](JavaWeb笔记.assets/image-20210409173248163.png)
+
+
+
+### Maven项目结构
+
+------
+
+![image-20210409173714597](JavaWeb笔记.assets/image-20210409173714597.png)
+
+
+
+核心配置文件 `pom.xml`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Maven版本及-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+<!--  配置的GAV -->
+  <groupId>org.example</groupId>
+  <artifactId>mavenTest</artifactId>
+  <version>1.0-SNAPSHOT</version>
+<!--  打包方式
+  jar:Java应用
+  war:JavaWeb应用
+-->
+  <packaging>war</packaging>
+
+  <name>mavenTest Maven Webapp</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+<!--配置-->
+  <properties>
+<!--    项目的默认构建编码-->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+<!--    代码版本-->
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+<!--项目依赖-->
+<!--  Maven添加依赖之后,会自动下载这个jar包,而且其高级之处在于,他会自动导入这个jar包说对应的其他jar包-->
+  <dependencies>
+<!--    具体依赖的jar包-->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+<!--项目构建用的东西-->
+  <build>
+    <finalName>mavenTest</finalName>
+<!--    使用的插件-->
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
+```
+
+
+
+ Maven由于约定大于配置的原因,可能导致我们写的配置文件,无法被导出或者生效的问题,解决方法是在`bulid`下面添加`resource`:
+
+```xml
+<resources>
+  <resource>
+    <directory>src/main/resources</directory>
+    <excludes>
+      <exclude>**/*.properties</exclude>
+      <exclude>**/*.xml</exclude>
+    </excludes>
+    <filtering>false</filtering>
+  </resource>
+  <resource>
+    <directory>src/main/java</directory>
+    <includes>
+      <include>**/*.properties</include>
+      <include>**/*.xml</include>
+    </includes>
+    <filtering>false</filtering>
+  </resource>
+</resources>
+```
+
+   
 
    
 
