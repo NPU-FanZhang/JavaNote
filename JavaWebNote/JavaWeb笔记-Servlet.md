@@ -466,6 +466,41 @@ public static final int SC_GATEWAY_TIMEOUT = 504;
    6. 获取OutputStream对象
    7. 将FileOutputStream流写入到buffer缓冲区中
    8. 使用OutputStream将缓冲区的数据输出到客户端
+   
+   ```java
+   public class FileDownload extends HttpServlet {
+       @Override
+       protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+   //        1. 获取下载文件的路径
+           String realPath = "E:\\JavaProject\\EmptyServlet\\response\\target\\classes\\wall.jpg";
+           System.out.println("download file url:"+realPath);
+   //        2. 或许下载文件名 获取路径最后一个斜杠位置+1 就是文件名的起始位置
+           String fileName = realPath.substring((realPath.lastIndexOf("\\") + 1));
+   //        3. 让浏览器支持我们所下载的东西
+           resp.setHeader("Content-Disposition","attachment;fileName = "+ URLEncoder.encode(fileName,"UTF-8"));
+   //        4. 获取下载文件的输入流
+           FileInputStream in = new FileInputStream(realPath);
+   //        5. 创建缓冲区
+           int len = 0;
+           byte[] buffer = new byte[1024];
+   //        6. 获取OutputStream对象
+           ServletOutputStream outputStream = resp.getOutputStream();
+   //        7. 将FileOutputStream流写入到buffer缓冲区中,使用OutputStream将缓冲区的数据输出到客户端
+           while ((len = in.read(buffer))>0)
+           {
+               outputStream.write(buffer,0,len);
+           }
+           outputStream.close();
+           in.close();
+       }
+   }
+   ```
+   
+3. 实现验证码
+
+   
+
+
 
 
 
