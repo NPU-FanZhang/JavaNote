@@ -385,15 +385,5 @@ HTTP状态码共分为5种类型：
 
    
 
-##    Servlet
-
-- Servlet是sun公司开发动态web的一门技术
-- Sun阿紫这些API中提供了一个借口叫做Servlet,如果想要开发servlet程序,只需要完成了两个步骤:
-  - 编写好一个类,实现servlet
-  - 把开发好的java类部署到web服务器中
-- 把实现了servlet接口的程序叫做Servlet
-
-### 1. 新建一个Maven项目
-
 
 
