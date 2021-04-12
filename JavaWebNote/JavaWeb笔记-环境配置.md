@@ -219,11 +219,11 @@ HTTP状态码共分为5种类型：
        </mirror>
         -->
        <mirror>
-   3         <id>nexus-aliyun</id>
-   4         <mirrorOf>*</mirrorOf>
-   5         <name>Nexus aliyun</name>
-   6         <url>http://maven.aliyun.com/nexus/content/groups/public</url>
-   7   </mirror> 
+            <id>nexus-aliyun</id>
+            <mirrorOf>*</mirrorOf>
+            <name>Nexus aliyun</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+      </mirror> 
        <!-- <mirror>
          <id>maven-default-http-blocker</id>
          <mirrorOf>external:http:*</mirrorOf>
@@ -385,5 +385,15 @@ HTTP状态码共分为5种类型：
 
    
 
-   
+##    Servlet
+
+- Servlet是sun公司开发动态web的一门技术
+- Sun阿紫这些API中提供了一个借口叫做Servlet,如果想要开发servlet程序,只需要完成了两个步骤:
+  - 编写好一个类,实现servlet
+  - 把开发好的java类部署到web服务器中
+- 把实现了servlet接口的程序叫做Servlet
+
+### 1. 新建一个Maven项目
+
+
 
