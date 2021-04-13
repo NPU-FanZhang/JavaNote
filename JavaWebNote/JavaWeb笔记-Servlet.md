@@ -268,7 +268,7 @@ doGet方法的一些内置方法:
 
 ------
 
-数据共享方法举例:
+### 数据共享方法举例:
 
 - 在`helloServlet`中设置数据
 
@@ -319,7 +319,7 @@ doGet方法的一些内置方法:
 
 ------
 
-获取初始化参数:
+### 获取初始化参数:
 
 - 初始化:
 
@@ -343,7 +343,7 @@ doGet方法的一些内置方法:
 
 ------
 
-请求转发:
+### 请求转发:
 
 - 配置转发
 
@@ -374,7 +374,7 @@ doGet方法的一些内置方法:
 
 ---
 
-读取资源文件:
+### 读取资源文件:
 
 - 在resources目录下新建properties
 
@@ -447,80 +447,330 @@ public static final int SC_HTTP_VERSION_NOT_SUPPORTED = 505;
 public static final int SC_GATEWAY_TIMEOUT = 504;
 ```
 
-### 2.常见应用
+### 2.下载文件
 
-1. 向浏览器输出消息
+1. 获取下载文件的路径
+2. 或许下载文件名
+3. 让浏览器支持我们所下载的东西
+4. 获取下载文件的输入流
+5. 创建缓冲区
+6. 获取OutputStream对象
+7. 将FileOutputStream流写入到buffer缓冲区中
+8. 使用OutputStream将缓冲区的数据输出到客户端
 
-   ``` java
-   public ServletOutputStream getOutputStream() throws IOException;
-   public PrintWriter getWriter() throws IOException;
-   ```
+```java
+public class FileDownload extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//        1. 获取下载文件的路径
+        String realPath = "E:\\JavaProject\\EmptyServlet\\response\\target\\classes\\wall.jpg";
+        System.out.println("download file url:"+realPath);
+//        2. 或许下载文件名 获取路径最后一个斜杠位置+1 就是文件名的起始位置
+        String fileName = realPath.substring((realPath.lastIndexOf("\\") + 1));
+//        3. 让浏览器支持我们所下载的东西
+        resp.setHeader("Content-Disposition","attachment;fileName = "+ URLEncoder.encode(fileName,"UTF-8"));
+//        4. 获取下载文件的输入流
+        FileInputStream in = new FileInputStream(realPath);
+//        5. 创建缓冲区
+        int len = 0;
+        byte[] buffer = new byte[1024];
+//        6. 获取OutputStream对象
+        ServletOutputStream outputStream = resp.getOutputStream();
+//        7. 将FileOutputStream流写入到buffer缓冲区中,使用OutputStream将缓冲区的数据输出到客户端
+        while ((len = in.read(buffer))>0)
+        {
+            outputStream.write(buffer,0,len);
+        }
+        outputStream.close();
+        in.close();
+    }
+}
+```
 
-2. 下载文件
+### 3.实现验证码
 
-   1. 获取下载文件的路径
-   2. 或许下载文件名
-   3. 让浏览器支持我们所下载的东西
-   4. 获取下载文件的输入流
-   5. 创建缓冲区
-   6. 获取OutputStream对象
-   7. 将FileOutputStream流写入到buffer缓冲区中
-   8. 使用OutputStream将缓冲区的数据输出到客户端
-   
-   ```java
-   public class FileDownload extends HttpServlet {
-       @Override
-       protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-   //        1. 获取下载文件的路径
-           String realPath = "E:\\JavaProject\\EmptyServlet\\response\\target\\classes\\wall.jpg";
-           System.out.println("download file url:"+realPath);
-   //        2. 或许下载文件名 获取路径最后一个斜杠位置+1 就是文件名的起始位置
-           String fileName = realPath.substring((realPath.lastIndexOf("\\") + 1));
-   //        3. 让浏览器支持我们所下载的东西
-           resp.setHeader("Content-Disposition","attachment;fileName = "+ URLEncoder.encode(fileName,"UTF-8"));
-   //        4. 获取下载文件的输入流
-           FileInputStream in = new FileInputStream(realPath);
-   //        5. 创建缓冲区
-           int len = 0;
-           byte[] buffer = new byte[1024];
-   //        6. 获取OutputStream对象
-           ServletOutputStream outputStream = resp.getOutputStream();
-   //        7. 将FileOutputStream流写入到buffer缓冲区中,使用OutputStream将缓冲区的数据输出到客户端
-           while ((len = in.read(buffer))>0)
-           {
-               outputStream.write(buffer,0,len);
-           }
-           outputStream.close();
-           in.close();
-       }
-   }
-   ```
-   
-3. 实现验证码
+```java
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //实现验证码功能
+        //让浏览器自动刷新, 3s一次
+        resp.setHeader("refresh","5");
+        //在内存中创建一个图片
+        BufferedImage image = new BufferedImage(100, 30, BufferedImage.TYPE_INT_RGB);
+        //得到图片
+        Graphics2D g = (Graphics2D)image.getGraphics();
+        g.setColor(Color.white);
+        g.fillRect(0,0,100,30);
+        //给图片添加数据
+        g.setColor(Color.BLUE);
+        g.setFont(new Font(null,Font.BOLD,20));
+        g.drawString(makeNum(),0,20);
 
-   
+        //告诉浏览器,这个请求用图片方式打开
+        resp.setContentType("image/jpeg");
+        //网站存在缓存, 不让浏览器缓存,因为验证码不停刷新,会爆内存
+        resp.setDateHeader("expires",-1);
+        resp.setHeader("Cache-Control","no-cache");
+        resp.setHeader("Pragma","no-cache");
+        //图片写给浏览器
+        ImageIO.write(image, "jpg", resp.getOutputStream());
+
+    }
+    public String makeNum(){
+        Random random = new Random();
+        String num = random.nextInt(999999)+"";
+        StringBuffer sb  = new StringBuffer();
+        for (int i = 0; i <6- num.length();i++)
+        {
+            sb.append("0");
+        }
+        num = sb.toString() + num;
+        return num;
+    }
+```
+
+效果如下,每五秒刷新一次:
+
+![image-20210413145053210](JavaWeb笔记-Servlet.assets/image-20210413145053210.png)
+
+### 4.实现重定向
+
+> 一个Web资源收到客户端请求, 会通知客户端去访问另外一个web资源, 这个过程叫做重定向。和请求转发区分开来。
+>
+> 核心代码: `public void sendRedirect(String location) throws IOException;`
+>
+> 常见场景：
+>
+> - 用户登录跳转
+
+<img src="JavaWeb笔记-Servlet.assets/image-20210413145820302.png" alt="image-20210413145820302" style="zoom:150%;" />
+
+```java
+/*
+    resp.setHeader("location","/response_war/download");
+    //resp.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);等价于下面302
+    resp.setStatus(302);
+ */
+//等价于上面两句
+resp.sendRedirect("/response_war/download");
+```
+原理就是请求改变:
+
+<img src="JavaWeb笔记-Servlet.assets/image-20210413153004390.png" alt="image-20210413153004390" style="zoom:67%;" />
+
+请求转发和重定向的区别?
+
+相同点:
+
+- 页面都会发生跳转
+
+不同点:
+
+- 请求转发 URL 不会发生变化
+- 重定向 的话 URL 会发生变化
 
 
 
+案例实现:
+
+`index.jsp`
+
+```jsp
+<html>
+<body>
+<h2>Hello World!</h2>
+<%--提交的路径需要寻找到项目的路径--%>
+<%--${pageContext.request.contextPath}代表当前的项目--%>
+<form action="${pageContext.request.contextPath}/login" method="get">
+    用户名:<input type="text" name="username">
+    密码:<input type="password" name="password">
+    <input type="submit">
+</form>
+</body>
+</html>
+
+```
+
+`success.jsp`
+
+```jsp
+<%--
+  Created by IntelliJ IDEA.
+  User: Admin
+  Date: 2021/4/13
+  Time: 16:06
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+<h1>SUCCESS</h1>
 
 
+</body>
+</html>
+```
 
+```java
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    System.out.println("Enter this request");
+    //处理请求
+    String username = req.getParameter("username");
+    String password = req.getParameter("password");
+    System.out.println("username is : "+username +" and the password is : "+password);
+    //重定向之后,下面的print不会输出,因为已经被覆盖
+    resp.getWriter().print("username is : "+username +" and the password is : "+password);
+    resp.sendRedirect("/response_war/success.jsp");
+    
+}
+```
 
+效果如下:
 
+![image-20210413161139775](JavaWeb笔记-Servlet.assets/image-20210413161139775.png)
 
+点击提交:
 
+![image-20210413161210780](JavaWeb笔记-Servlet.assets/image-20210413161210780.png)
 
+注释重定向后:
 
-
-
-
-
-
-
-
-
+![image-20210413162153222](JavaWeb笔记-Servlet.assets/image-20210413162153222.png)
 
 ## 7.HttpServletRequest
+
+`HttpServletRequest`代表客户端的请求，用户通过Http协议访问服务器，Http请求中的所有信息会被封装到`HttpServletRequest`，通过这个`HttpServletRequest`的方法，获取客户端的所有信息。
+
+### 1.Request的常见方法
+
+![image-20210413163916829](JavaWeb笔记-Servlet.assets/image-20210413163916829.png)
+
+### 2.Request提交案例
+
+
+
+
+
+`index.jsp`
+
+```jsp
+<%--
+  Created by IntelliJ IDEA.
+  User: Admin
+  Date: 2021/4/13
+  Time: 16:06
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+<h1>Login</h1>
+<div style="text-align: center;">
+<%--    这里表单以post方法提交,提交到LoginServlet请求--%>
+   <%--    如果路径转义有错,可能是对应的web.xml头未设置和Tomcat同步的--%> 
+    <form action="${pageContext.request.contextPath}/LoginServlet" method="post" >
+        UserName:<input type="text" name="username"><br>
+        PassWord:<input type="password" name="password"><br>
+        hobby:
+        <input type="checkbox" name="hobbes" value="girl">girl
+        <input type="checkbox" name="hobbes" value="boy">boy
+        <input type="checkbox" name="hobbes" value="code">code
+        <input type="checkbox" name="hobbes" value="sing">sing
+        <br>
+        <input type="submit">
+    </form>
+</div>
+
+</body>
+</html>
+```
+
+​	`doPost`
+
+```java
+@Override
+protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    req.setCharacterEncoding("utf-8");
+    resp.setCharacterEncoding("utf-8");
+    String username = req.getParameter("username");
+    String password = req.getParameter("password");
+    String[] hobbes = req.getParameterValues("hobbes");
+
+    System.out.println("===============================");
+    System.out.println("username is "+username);
+    System.out.println("password is "+password);
+    System.out.println(Arrays.toString(hobbes));
+    //请求转发跳转
+    //这里/会识别成当前web应用
+    req.getRequestDispatcher("/success.jsp").forward(req,resp);
+    //重定向跳转
+    //resp.sendRedirect("/Request_war/success.jsp");
+}
+```
+
+
+
+
+
+登录页面:
+
+![image-20210413172025912](JavaWeb笔记-Servlet.assets/image-20210413172025912.png)
+
+```java
+===============================
+username is admin
+password is 123
+[girl, boy, code]
+```
+
+![image-20210413185208950](JavaWeb笔记-Servlet.assets/image-20210413185208950.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
