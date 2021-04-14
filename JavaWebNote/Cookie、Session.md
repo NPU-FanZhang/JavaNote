@@ -2,14 +2,10 @@
 
 [TOC]
 
-
-
 一个网站，如何证明客户端访问过？
 
 1. 服务器给客户端一个信件cookie，客户端下次访问服务器只需要带上cookie便可证明之前已经访问过。
 2. 服务器登记过访问，下次只需要来进行session匹配。
-
-
 
 ## Cookie
 
@@ -110,6 +106,10 @@ URLDecoder.decode(cookie.getValue(),"utf-8")//解码
 
 
 
+### Cookie验证客户端是否访问过
+
+![image-20210414100140385](Cookie、Session.assets/image-20210414100140385.png)
+
 ## Session(重点)
 
 > Session：在计算机中，尤其是在网络应用中，称为“会话控制”。
@@ -125,7 +125,75 @@ URLDecoder.decode(cookie.getValue(),"utf-8")//解码
 
 ### Session的使用
 
+获取session并保存属性setAttribute
 
+```java
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //解决乱码
+        req.setCharacterEncoding("utf-8");
+        resp.setCharacterEncoding("utf-8");
+        resp.setContentType("text/html;charset=utf-8");
+
+        //得到session
+        HttpSession session = req.getSession();
+
+        //session 中保存数据
+        session.setAttribute("name",new Person("F4N",12));
+
+        //获取sessionID
+        String sessionId = session.getId();
+
+        //判断session是否为新建的
+        if(session.isNew())
+        {
+            resp.getWriter().write("session创建成功,ID为:" +sessionId);
+        }else
+        {
+            resp.getWriter().write("Session已经在服务器中存在了,ID为:"+sessionId);
+        }
+
+//        session做了什么事情
+//        Cookie cookie = new Cookie("JSESSIONID",sessionId);
+//        resp.addCookie(cookie);
+    }
+```
+
+![image-20210414100525067](Cookie、Session.assets/image-20210414100525067.png)
+
+可以在另外一个Servlet接口中获取刚才设置的属性
+
+```java
+//得到session
+HttpSession session = req.getSession();
+
+Person name = (Person)session.getAttribute("name");
+resp.getWriter().write("Session已经在服务器中存在了,ID为:"+session.getId());
+resp.getWriter().write(name.toString());
+```
+
+![image-20210414100555489](Cookie、Session.assets/image-20210414100555489.png)
+
+移除属性和注销session
+
+```java
+//得到session
+HttpSession session = req.getSession();
+session.removeAttribute("name");
+session.invalidate();//注销session,但服务器会自动重建一个
+```
+
+
+
+`web.xml`中设置session的失效时间
+
+```xml
+<!--  设置session失效时间-->
+  <session-config>
+<!--    1分钟后自动失效,以分钟为单位-->
+    <session-timeout>1</session-timeout>
+  </session-config>
+```
 
 
 
@@ -133,9 +201,14 @@ URLDecoder.decode(cookie.getValue(),"utf-8")//解码
 
 - Cookie是把用户的数据写给用户的浏览器，浏览器保存（可以保存多个）
 - Session是把用户的数据写到用户独占Session中，服务器端保存（保存重要信息，减少服务器资源的浪费）
-- Session对象由服务创建；
+- Session对象由服务器创建；
 
+使用场景:
 
+- 保存用户的登录信息
+- 购物车信息
+- 整个网站中经常使用的数据,我们讲它保存在session中
 
+### Session验证客户是否访问过
 
-
+![image-20210414100404694](Cookie、Session.assets/image-20210414100404694.png)
