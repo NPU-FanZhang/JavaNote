@@ -181,3 +181,135 @@ public class Listener implements  HttpSessionListener {
 
 过滤器：实现权限拦截
 
+
+
+## JDBC
+
+### IDEA连接数据库:
+
+1. 选择mysql
+
+   ![image-20210415155956495](MVC、JDBC、Filter.assets/image-20210415155956495.png)
+
+2. 选择驱动
+
+   ![image-20210415160153522](MVC、JDBC、Filter.assets/image-20210415160153522.png)
+
+3. 选择数据库表
+
+   ![image-20210415160314581](MVC、JDBC、Filter.assets/image-20210415160314581.png)
+
+
+
+### JDBC连接数据库
+
+```java
+public static void main(String[] args) throws ClassNotFoundException, SQLException {
+    //配置信息
+    String url = "jdbc:mysql://localhost:3306/jdbc?useUnicode=true&characterEncoding=utf-8";
+    String username = "root";
+    String password = "123456";
+    //加载驱动
+    Class.forName("com.mysql.jdbc.Driver");
+    //链接数据库
+    Connection connection = DriverManager.getConnection(url, username, password);
+    //向数据库发送sql的对象Statement:CURD
+    Statement statement = connection.createStatement();
+    //写sql
+    String sql="select * from   users;";
+    //执行sql,返回一个ResultSet,结果集
+    ResultSet resultSet = statement.executeQuery(sql);
+    while(resultSet.next()){
+        System.out.println("id = "+resultSet.getObject("id"));
+        System.out.println("name = "+resultSet.getObject("name"));
+        System.out.println("email = "+resultSet.getObject("email"));
+        System.out.println("birthday = "+resultSet.getObject("birthday"));
+    }
+    //关闭链接,释放资源,先开后关
+    resultSet.close();
+    statement.close();
+    connection.close();
+    
+}
+```
+
+预编译sql
+
+```java
+public static void main(String[] args) throws ClassNotFoundException, SQLException {
+    //配置信息
+    String url = "jdbc:mysql://localhost:3306/jdbc?useUnicode=true&characterEncoding=utf-8";
+    String username = "root";
+    String password = "123456";
+    //加载驱动
+    Class.forName("com.mysql.jdbc.Driver");
+    //链接数据库
+    Connection connection = DriverManager.getConnection(url, username, password);
+    //向数据库发送sql的对象Statement、PreparedStatement:CURD
+    //Statement statement = connection.createStatement();
+    //写sql
+    //查
+    //String sql="select * from   users;";
+    //增删改都使用executeUpdate即可
+    String sql="insert into users (id, name, password, email, birthday) values (?,?,?,?,?);";
+    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+    preparedStatement.setInt(1,5);//给第一个占位符?,赋值为 5
+    preparedStatement.setString(2,"lili");//给第二个占位符?,赋值为 lili
+    preparedStatement.setString(3,"123456");//给第三个占位符?,赋值为 123456
+    preparedStatement.setString(4,"151@qq.com");//给第四个占位符?,赋值为 151@qq.com
+    preparedStatement.setDate(5,new Date(new java.util.Date().getTime()));//给第五个占位符?,赋值为 1
+    //执行sql,返回受影响的行数
+    System.out.println(sql);
+    int i = preparedStatement.executeUpdate();//受影响的行数
+    if (i > 0) {
+        System.out.println("受影响的行数为:"+i);
+    }
+    //关闭链接,释放资源,先开后关
+    preparedStatement.close();
+    connection.close();
+}
+```
+
+
+
+## Junit
+
+单元测试，为了可以直接测试方法
+
+添加依赖
+
+```xml
+<dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.13.2</version>
+</dependency>
+```
+
+方法左侧会出现执行按钮
+
+![image-20210415162837347](MVC、JDBC、Filter.assets/image-20210415162837347.png)
+
+也会正常报错
+
+![image-20210415162909953](MVC、JDBC、Filter.assets/image-20210415162909953.png)
+
+`@Test`的源码
+
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD})//作用域为方法
+public @interface Test {
+    Class<? extends Throwable> expected() default Test.None.class;
+
+    long timeout() default 0L;
+
+    public static class None extends Throwable {
+        private static final long serialVersionUID = 1L;
+
+        private None() {
+        }
+    }
+}
+```
+
