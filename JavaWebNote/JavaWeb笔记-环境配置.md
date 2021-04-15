@@ -363,24 +363,26 @@ HTTP状态码共分为5种类型：
  Maven由于约定大于配置的原因,可能导致我们写的配置文件,无法被导出或者生效的问题,解决方法是在`bulid`下面添加`resource`:
 
 ```xml
-<resources>
-  <resource>
-    <directory>src/main/resources</directory>
-    <excludes>
-      <exclude>**/*.properties</exclude>
-      <exclude>**/*.xml</exclude>
-    </excludes>
-    <filtering>false</filtering>
-  </resource>
-  <resource>
-    <directory>src/main/java</directory>
-    <includes>
-      <include>**/*.properties</include>
-      <include>**/*.xml</include>
-    </includes>
-    <filtering>false</filtering>
-  </resource>
-</resources>
+<build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/*.properties</exclude>
+                    <exclude>**/*.xml</exclude>
+                </excludes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+  </build>
 ```
 
    
