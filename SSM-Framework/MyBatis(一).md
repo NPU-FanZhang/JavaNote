@@ -1,6 +1,6 @@
 # MyBatis
 
-![MyBatis logo](MyBatis.assets/mybatis-logo.png)
+![MyBatis logo](MyBatis(一).assets/mybatis-logo.png)
 
 [TOC]
 
@@ -54,7 +54,7 @@
 
    创建一个空的Maven项目，注意Maven的项目位置，删除src，为了下面创建多个`modules`
 
-   ![image-20210415171917379](MyBatis.assets/image-20210415171917379.png)
+   ![image-20210415171917379](MyBatis(一).assets/image-20210415171917379-1618565229507.png)
 
 3. 导入依赖
 
@@ -84,7 +84,7 @@
 
 4. 创建一个`module`
 
-   ![image-20210415172723362](MyBatis.assets/image-20210415172723362.png)
+   ![image-20210415172723362](MyBatis(一).assets/image-20210415172723362.png)
 
 ## 2、配置MyBatis
 
@@ -94,7 +94,7 @@
 
 1. 创建`configuration`核心配置文件
 
-   <img src="MyBatis.assets/image-20210415191405297.png" alt="image-20210415191405297" style="zoom:67%;" />
+   <img src="MyBatis(一).assets/image-20210415191405297.png" alt="image-20210415191405297" style="zoom:67%;" />
 
    ```xml
    <?xml version="1.0" encoding="UTF-8" ?>
@@ -122,7 +122,7 @@
 
 2. 编写工具类
 
-   ![image-20210415192114024](MyBatis.assets/image-20210415192114024.png)
+   ![image-20210415192114024](MyBatis(一).assets/image-20210415192114024.png)
 
    ```java
    package com.zhang.utils;
@@ -160,7 +160,7 @@
 
 ## 3、编写代码
 
-![image-20210415195657640](MyBatis.assets/image-20210415195657640.png)
+![image-20210415195657640](MyBatis(一).assets/image-20210415195657640.png)
 
 - 实体类
 
@@ -248,7 +248,7 @@
 
 1. 创建测试类
 
-   ![image-20210415201729628](MyBatis.assets/image-20210415201729628.png)
+   ![image-20210415201729628](MyBatis(一).assets/image-20210415201729628.png)
 
    ```java
    public class UserDaoTest {
@@ -271,7 +271,7 @@
    
     执行结果为：
    
-    ![image-20210415212552977](MyBatis.assets/image-20210415212552977.png)
+    ![image-20210415212552977](MyBatis(一).assets/image-20210415212552977.png)
 
 ## 5、常见报错
 
@@ -346,6 +346,8 @@
 
 
 # CRUD
+
+> 它代表创建（`Create`）、更新（`Update`）、读取（`Retrieve`）和删除（`Delete`）操作。
 
 ## 1.	Namespace
 
@@ -423,11 +425,11 @@ public void testGetUserById(){
 
 `testGetUserList`的结果:
 
-![image-20210416103805173](MyBatis.assets/image-20210416103805173.png)
+![image-20210416103805173](MyBatis(一).assets/image-20210416103805173.png)
 
 `testGetUserById`的结果
 
-![image-20210416103851787](MyBatis.assets/image-20210416103851787.png)
+![image-20210416103851787](MyBatis(一).assets/image-20210416103851787.png)
 
 
 
@@ -473,7 +475,7 @@ public void testAddUser(){
 
 成功的结果:
 
-![image-20210416105940596](MyBatis.assets/image-20210416105940596.png)
+![image-20210416105940596](MyBatis(一).assets/image-20210416105940596.png)
 
 失败的结果(主键重复)`Duplicate entry '5' for key 'PRIMARY'`:
 
@@ -524,11 +526,11 @@ public void testUpdateUser()
 
 ID唯一，修改成功的结果：
 
-![image-20210416111526462](MyBatis.assets/image-20210416111526462.png)
+![image-20210416111526462](MyBatis(一).assets/image-20210416111526462.png)
 
 如果修改的ID不存在:
 
-![image-20210416111444037](MyBatis.assets/image-20210416111444037.png)
+![image-20210416111444037](MyBatis(一).assets/image-20210416111444037.png)
 
 
 
@@ -569,7 +571,99 @@ public void testdeleteUser()
 
 
 
-## 6. 	几种类型的多个参数的传递方式
+## 6.	Map传值
+
+*假设实体类或者数据库表中的参数或字段过多，我们考虑使用Map。*
+
+`interface`
+
+```java
+//插入一个用户
+int addUserByMap(HashMap map);
+```
+
+`xml`
+
+```xml
+<insert id="addUserByMap" parameterType="map" >
+    insert into mybatis.user(id, name, password) values (#{UserId},#{UserName},#{PassWord});
+</insert>
+```
+
+```java
+这里的#{UserId},#{UserName},#{PassWord}是在测试类中调用时,map绑定的key名
+```
+
+`Test测试类`
+
+```java
+@Test
+public void testAddUserByMap(){
+    //第一步:获取SqlSession对象
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+
+    HashMap<String, Object> map = new HashMap<String, Object>();
+    map.put("UserId",7);
+    map.put("UserName","merry");
+    map.put("PassWord","123456");
+
+    int res = userMapper.addUserByMap(map);
+
+    sqlSession.commit();
+    System.out.println(res);
+    sqlSession.close();
+}
+```
+
+## 7.	模糊查询
+
+1. Java代码执行的时候，传递通配符% % ，较为安全。
+
+   `xml`
+
+   ```xml
+   <select id="getUserLike" resultType="com.zhang.pojo.User">
+       select * from mybatis.user where name like #{value};
+   </select>
+   ```
+
+   `interface`
+
+   ```java
+   //模糊查询用户
+   List<User> getUserLike(String value);
+   ```
+
+   `Test类`
+
+   ```java
+   	@Test
+       public void testgetUserLike(){
+           SqlSession sqlSession = MybatisUtils.getSqlSession();
+           UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+   
+           List<User> userLike = userMapper.getUserLike("%王%");
+           for (User user : userLike) {
+               System.out.println(user);
+           }
+           sqlSession.close();
+       }
+   ```
+
+2. 直接在`xml`中连接通配符%
+
+   `xml`
+   
+   ```xml
+   <select id="getUserLike" resultType="com.zhang.pojo.User">
+       select * from mybatis.user where name like "%"#{value}"%";
+   </select>
+   ```
+
+
+
+## 8. 	几种类型的多个参数的传递方式
 
 - 无论你传的参数是什么样的，最后mybtis都会将你传入的转换为map。
 - 那么既然这样，当我们要传入多个参数时，何不直接给与map类型即可。
