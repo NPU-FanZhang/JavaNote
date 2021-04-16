@@ -345,25 +345,352 @@
 
 
 
+# CRUD
+
+## 1.	Namespace
+
+```xml
+<mapper namespace="com.zhang.dao.UserMapper">
+<!--    中文注释-->
+    <select id="getUserById" parameterType="int" resultType="com.zhang.pojo.User">
+        select * from mybatis.user where id = #{id}
+    </select>
+</mapper>
+```
+
+- `namespace`中的包名要和Dao/Mapper接口的包名一致。
+
+- `id`就是Mapper中的方法名
+- `parameterType`是传入的参数类型
+- `resultType`就是返回值类型
+- 编写sql时,按`ctrl`+`enter`可以建立连接，可以自动补全sql
+
+## 2.	Select 选择
+
+`UserMapper`接口的定义
+
+```java
+public interface UserMapper {
+    //查询全部用户
+    List<User> getUserList();
+    //依据Id查询
+    User getUserById(int id);
+}
+```
+
+以下面的`UserMapper.xml`对应的声明
+
+```xml
+<mapper namespace="com.zhang.dao.UserMapper">
+<!--    中文注释 -->
+    <select id="getUserList" resultType="com.zhang.pojo.User">
+        select * from mybatis.user
+    </select>
+    <select id="getUserById" parameterType="int" resultType="com.zhang.pojo.User">
+        select * from mybatis.user where id = #{id}
+    </select>
+</mapper>
+```
+
+`Test`类的实现:
+
+```java
+@Test
+public void testGetUserList(){
+    //第一步:获取SqlSession对象
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    //方式一执行Sql
+    UserMapper userDao = sqlSession.getMapper(UserMapper.class);
+    List<User> userList = userDao.getUserList();
+    //方式二:不推荐
+    //List<User> userList = sqlSession.selectList("com.zhang.dao.UserDao.getUserList");
+    for (User user : userList) {
+        System.out.println(user);
+    }
+    sqlSession.close();
+}
+
+@Test
+public void testGetUserById(){
+    //第一步:获取SqlSession对象
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+    User userById = userMapper.getUserById(1);
+    System.out.println(userById);
+    sqlSession.close();
+}
+```
+
+`testGetUserList`的结果:
+
+![image-20210416103805173](MyBatis.assets/image-20210416103805173.png)
+
+`testGetUserById`的结果
+
+![image-20210416103851787](MyBatis.assets/image-20210416103851787.png)
 
 
 
+## 3.	Insert 	插入
+
+> 插入操作需要提交事务，在`Test`中提交事务。
+
+`UserMapper`接口的定义
+
+```java
+public interface UserMapper {
+    //插入一个用户
+	int addUser(User user);
+}
+```
+
+`UserMapper.xml`对应的声明
+
+```xml
+<!--    对象中的属性可以直接取出 ,sql中的参数在测试时才赋予-->
+    <insert id="addUser" parameterType="com.zhang.pojo.User" >
+        insert into mybatis.user(id, name, password) values (#{id},#{name},#{password})
+    </insert>
+```
+
+`Test`测试类：
+
+```java
+@Test
+public void testAddUser(){
+    //第一步:获取SqlSession对象
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+
+    int res = userMapper.addUser(new User(5, "lisa", "254621"));
+    //res为成功操作的行数
+    //注意提交事务才能改变数据库
+    sqlSession.commit();
+    System.out.println(res);
+    sqlSession.close();
+}
+```
+
+成功的结果:
+
+![image-20210416105940596](MyBatis.assets/image-20210416105940596.png)
+
+失败的结果(主键重复)`Duplicate entry '5' for key 'PRIMARY'`:
+
+```shell
+org.apache.ibatis.exceptions.PersistenceException: 
+### Error updating database.  Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException: Duplicate entry '5' for key 'PRIMARY'
+### The error may exist in com/zhang/dao/UserMapper.xml
+### The error may involve com.zhang.dao.UserMapper.addUser-Inline
+```
 
 
 
+## 4.	Update 更新
+
+> 更新操作需要提交事务，在`Test`中提交事务。
+
+`UserMapper`接口的定义
+
+```java
+public interface UserMapper {
+    // 更新一个用户
+    int updateUser(User user);
+}
+```
+
+`UserMapper.xml`对应的声明
+
+```xml
+<update id="updateUser" parameterType="com.zhang.pojo.User">
+    update mybatis.user set name = #{name}, password = #{password} where id=#{id};
+</update>
+```
+
+`Test`测试类：
+
+```java
+@Test
+public void testUpdateUser()
+{
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+    int res = mapper.updateUser(new User(6, "jack", "123456"));
+    sqlSession.commit();
+    System.out.println(res);
+    sqlSession.close();
+}
+```
+
+ID唯一，修改成功的结果：
+
+![image-20210416111526462](MyBatis.assets/image-20210416111526462.png)
+
+如果修改的ID不存在:
+
+![image-20210416111444037](MyBatis.assets/image-20210416111444037.png)
 
 
 
+## 5.	Delete 删除
+
+> 注意多个参数的书写方式，事务提交。
+
+`UserMapper`接口的定义
+
+```java
+//删除一个用户,基于注解,传递多个参数
+int deleteUser(@Param("id")int id,@Param("name")String name);
+```
+
+`UserMapper.xml`对应的声明
+
+```xml
+<delete id="deleteUser">
+    delete from mybatis.user where id = #{id} or name = #{name};
+</delete>
+```
+
+`Test`测试类：
+
+```
+@Test
+public void testdeleteUser()
+{
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+    int jack = mapper.deleteUser(6, "jack");
+
+    System.out.println(jack);
+    sqlSession.commit();
+    sqlSession.close();
+}
+```
 
 
 
+## 6. 	几种类型的多个参数的传递方式
+
+- 无论你传的参数是什么样的，最后mybtis都会将你传入的转换为map。
+- 那么既然这样，当我们要传入多个参数时，何不直接给与map类型即可。
+- mapper.xml通过`#{map.key}`来获取值即可。这个特别适合动态搜索，或者多个参数的查询，并且可以在mapper的xml语句中通过if判断来实现若为空，则不添加查询条件，还可以通过for来进行遍历。
+
+```xml
+<if test="userId != null">
+    #{userId,jdbcType=VARCHAR},
+</if>
+```
 
 
 
+### 1.	单个参数
+
+`interface`
+
+```xml
+public List<XXBean> getXXBeanList(@param("id")String id);  
+```
+
+`xml`
+
+```xml
+<select id="getXXXBeanList" parameterType="java.lang.String" resultType="XXBean">
+　　select t.* from tableName t where t.id= #{id}  
+</select>  
+```
+
+```java
+--其中方法名和ID一致，#{}中的参数名与方法中的参数名一致。
+--这里采用的是@Param这个参数，实际上@Param这个最后会被Mabatis封装为map类型的。
+--select后的字段列表要和bean中的属性名一致， 如果不一致的可以用 as 来补充。
+```
 
 
 
+### 2.	多个参数--通过索引
+
+`interface`
+
+```java
+public List<XXXBean> getXXXBeanList(String xxId, String xxCode);  
+```
+
+`xml`
+
+```xml
+<select id="getXXXBeanList" resultType="XXBean">
+　　select t.* from tableName where id = #{0} and name = #{1}  
+</select>
+```
+
+```
+由于是多参数那么就不能使用parameterType， 改用#｛index｝是第几个就用第几个的索引，索引从0开始
+```
+
+### 3.	多个参数--基于注解(推荐)
+
+`interface`
+
+```java
+public List<XXXBean> getXXXBeanList(@Param("id")String id, @Param("code")String code); 
+```
+
+`xml`
+
+```xml
+<select id="getXXXBeanList" resultType="XXBean">
+　　select t.* from tableName where id = #{id} and name = #{code}  
+</select>  
+```
+
+```
+由于是多参数那么就不能使用parameterType， 这里用@Param来指定哪一个
+```
 
 
 
+### 4.	多个参数--Map封装多参数
+
+`interface`
+
+```java
+public List<XXXBean> getXXXBeanList(HashMap map);  
+```
+
+`xml`
+
+```xml
+<select id="getXXXBeanList" parameterType="hashmap" resultType="XXBean">
+　　select 字段... from XXX where id=#{xxId} code = #{xxCode}  
+</select>  
+```
+
+```java
+其中hashmap是mybatis自己配置好的直接使用就行。map中key的名字是那个就在#{}使用那个，map如何封装就不用了我说了吧。 
+```
+
+
+
+### 5.	多个参数--List封装in
+
+`interface`
+
+```java
+public List<XXXBean> getXXXBeanList(List<String> list);
+```
+
+`xml`
+
+```xml
+<select id="getXXXBeanList" resultType="XXBean">
+　　select 字段... from XXX where id in
+　　<foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+　　　　#{item}  
+　　</foreach>  
+</select>   
+```
+
+```java
+foreach 最后的效果是select 字段... from XXX where id in ('1','2','3','4') 
+```
 
