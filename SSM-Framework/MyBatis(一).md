@@ -150,6 +150,8 @@
        //有了SQLSessionFactory,顾名思义,我们可以从中获取SqlSession的实例了
        //SqlSession完全包含了面向数据库执行Sql命令的所有方法
        public static SqlSession getSqlSession(){
+           //传入true可以自动提交事务,但是为了避免开发错误,还是手动提交比较好
+           //return sqlSessionFactory.openSession(true);
            return sqlSessionFactory.openSession();
        }
    
