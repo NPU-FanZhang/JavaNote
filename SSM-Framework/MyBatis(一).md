@@ -79,6 +79,11 @@
                <artifactId>mybatis</artifactId>
                <version>3.5.2</version>
            </dependency>
+           <dependency>
+               <groupId>org.projectlombok</groupId>
+               <artifactId>lombok</artifactId>
+               <version>1.18.20</version>
+           </dependency>
        </dependencies>
    ```
 
