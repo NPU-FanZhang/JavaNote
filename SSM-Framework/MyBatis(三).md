@@ -4,6 +4,10 @@
 
 [TOC]
 
+
+
+
+
 # 1.	分页
 
 为什么要分页?
@@ -892,4 +896,305 @@ public void queryBlogForeach()
 Blog(id=c9f7b3e34e954b179e0da43d338d5a70, title=Mybatis, author=狂神说, createTime=Tue Apr 20 17:24:19 CST 2021, views=9999)
 Blog(id=05fb82806be04f2fac7559d919ad0736, title=Java, author=狂神说, createTime=Tue Apr 20 17:24:19 CST 2021, views=1999)
 ```
+
+
+
+
+
+# 8.	Mybatis缓存Cache
+
+1. 什么是缓存Cache?
+   - 存在内存(或临时的高速存储器中)的数据.
+   - 用户再次访问时，如果Cache命中，就不需要再去访问低速的磁盘存储器。
+2. 为什么使用缓存？
+   - 减少和数据库交互次数，减少系统开销，提高效率。
+3. 什么样的数据适合使用缓存？
+   - 经常执行查询操作，不常改变的数据。
+
+![img](MyBatis(三).assets/15778027-a1f96fa617105498.jpg)
+
+
+
+## 1.	Mybatis缓存
+
+- MyBatis 内置了一个强大的事务性查询缓存机制，它可以非常方便地配置和定制。 为了使它更加强大而且易于配置，我们对 MyBatis 3 中的缓存实现进行了许多改进。
+- 默认情况下，只启用了本地的会话缓存，它仅仅对一个会话中的数据进行缓存。
+- Mybatis中默认定义了两级缓存：**一级缓存**和**二级缓存**
+  - 默认情况下，只有一级缓存开启。（SqlSession级别的缓存，也成为本地缓存）
+  - 二级缓存需要手动开启和配置，他是基于namespace级别的缓存。
+  - 为了提高可扩展性，Mybatis定义了缓存接口Cache，我们可以通过实现Cache接口来定义二级缓存。
+
+![image-20210421110138098](MyBatis(三).assets/image-20210421110138098.png)
+
+## 2.	一级缓存
+
+### 1.连续查询
+
+对同一数据的两次查询:
+
+```java
+@Test
+public void TestgetUserById()
+{
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+    User user = mapper.getUserById(1);
+    System.out.println(user);
+    System.out.println("-----------------");
+    User user2 = mapper.getUserById(1);
+    System.out.println(user2);
+    sqlSession.close();
+}
+```
+
+结果只进行了一次连接：
+
+```shell
+Setting autocommit to false on JDBC Connection [com.mysql.jdbc.JDBC4Connection@6166e06f]
+==>  Preparing: select * from mybatis.user where id = ?; 
+==> Parameters: 1(Integer)
+<==    Columns: id, name, password
+<==        Row: 1, 张三, 123456
+<==      Total: 1
+User{id=1, name='张三', psw='123456'}
+-----------------
+User{id=1, name='张三', psw='123456'}
+Resetting autocommit to true on JDBC Connection [com.mysql.jdbc.JDBC4Connection@6166e06f]
+Closing JDBC Connection [com.mysql.jdbc.JDBC4Connection@6166e06f]
+Returned connection 1634132079 to pool.
+```
+
+
+
+### 2.穿插增删改操作
+
+​		执行序列中存在修改操作的话，后面的同样的查询不会再走缓存。
+
+```java
+@Test
+public void TestgetUserById()
+{
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+    User user = mapper.getUserById(1);
+    System.out.println(user);
+    System.out.println("-----------------");
+    HashMap hashMap = new HashMap();
+    hashMap.put("id",1);
+    hashMap.put("name","easy");
+    hashMap.put("password","123qasw");
+    int i = mapper.updataUser(hashMap);
+    System.out.println("-----------------");
+    User user2 = mapper.getUserById(2);
+    System.out.println(user2);
+    sqlSession.close();
+}
+```
+
+第二次查询id=1的用户，重新执行了SQL。
+
+```shell
+Setting autocommit to false on JDBC Connection [com.mysql.jdbc.JDBC4Connection@6166e06f]
+==>  Preparing: select * from mybatis.user where id = ?; 
+==> Parameters: 1(Integer)
+<==    Columns: id, name, password
+<==        Row: 1, 张三, 123456
+<==      Total: 1
+User{id=1, name='张三', psw='123456'}
+-----------------
+==>  Preparing: update mybatis.user set password = ? where id =? 
+==> Parameters: null, 1(Integer)
+<==    Updates: 1
+-----------------
+==>  Preparing: select * from mybatis.user where id = ?; 
+==> Parameters: 2(Integer)
+<==    Columns: id, name, password
+<==        Row: 2, 李四, 123456
+<==      Total: 1
+User{id=2, name='李四', psw='123456'}
+Rolling back JDBC Connection [com.mysql.jdbc.JDBC4Connection@6166e06f]
+Resetting autocommit to true on JDBC Connection [com.mysql.jdbc.JDBC4Connection@6166e06f]
+Closing JDBC Connection [com.mysql.jdbc.JDBC4Connection@6166e06f]
+Returned connection 1634132079 to pool.
+```
+
+### 3.	注意点
+
+- 可以手动清理缓存
+
+  ```java
+  sqlSession.clearCache();
+  ```
+
+- 一级缓存默认开启，只在一次sqlSession中有效，也就是在打开连接和关闭连接的区间有效。
+
+- 一级缓存默认开启。
+
+
+
+## 3.	二级缓存
+
+- 默认情况下，只启用了本地的会话缓存，它仅仅对一个会话中的数据进行缓存。 要启用全局的二级缓存，只需要在你的 SQL 映射文件中添加一行(需要现在设置中开启全局缓存)：
+
+  - 显示的开启全局缓存`mybatis-config.xml`
+
+    ```xml
+    <!--显示的开启全局缓存-->
+    <setting name="cacheEnabled" value="true"/>
+    ```
+
+  - 在当前`Mapper.xml`中开启二级缓存
+
+    ```xml
+    <cache/>
+    <!--可以进行配置-->
+    <cache
+      eviction="FIFO"
+      flushInterval="60000"
+      size="512"
+      readOnly="true"/>
+    ```
+
+- 缓存只作用于 cache 标签所在的映射文件中的语句。
+
+- 可用的清除策略有：
+
+  - `LRU` – 最近最少使用：移除最长时间不被使用的对象。
+  - `FIFO` – 先进先出：按对象进入缓存的顺序来移除它们。
+  - `SOFT` – 软引用：基于垃圾回收器状态和软引用规则移除对象。
+  - `WEAK` – 弱引用：更积极地基于垃圾收集器状态和弱引用规则移除对象。
+
+  默认的清除策略是 LRU。
+
+- 二级缓存是事务性的。这意味着，当 SqlSession 完成并提交时，或是完成并回滚，但没有执行 flushCache=true 的 insert/delete/update 语句时，缓存会获得更新。
+
+
+
+### 1.	关闭二级缓存执行
+
+创建两个`sqlSession`
+
+```java
+    @Test
+    public void TestgetUserById()
+    {
+        SqlSession sqlSession1 = MybatisUtils.getSqlSession();
+        SqlSession sqlSession2 = MybatisUtils.getSqlSession();
+        UserMapper mapper1 = sqlSession1.getMapper(UserMapper.class);
+        UserMapper mapper2 = sqlSession2.getMapper(UserMapper.class);
+
+        User user1 = mapper1.getUserById(1);
+        User user2 = mapper2.getUserById(1);
+        System.out.println(user1);
+        System.out.println(user2);
+    }
+```
+
+执行结果,查询了两次:
+
+```shell
+Opening JDBC Connection
+Created connection 1634132079.
+Setting autocommit to false on JDBC Connection [com.mysql.jdbc.JDBC4Connection@6166e06f]
+==>  Preparing: select * from mybatis.user where id = ?; 
+==> Parameters: 1(Integer)
+<==    Columns: id, name, password
+<==        Row: 1, 张三, 123456
+<==      Total: 1
+Opening JDBC Connection
+Created connection 1147258851.
+Setting autocommit to false on JDBC Connection [com.mysql.jdbc.JDBC4Connection@4461c7e3]
+==>  Preparing: select * from mybatis.user where id = ?; 
+==> Parameters: 1(Integer)
+<==    Columns: id, name, password
+<==        Row: 1, 张三, 123456
+<==      Total: 1
+User{id=1, name='张三', psw='123456'}
+User{id=1, name='张三', psw='123456'}
+
+```
+
+
+
+### 2.	打开二级缓存
+
+创建两个SqlSession，提前关闭一个。
+
+```java
+SqlSession sqlSession1 = MybatisUtils.getSqlSession();
+SqlSession sqlSession2 = MybatisUtils.getSqlSession();
+
+UserMapper mapper1 = sqlSession1.getMapper(UserMapper.class);
+User user1 = mapper1.getUserById(1);
+System.out.println(user1);
+sqlSession1.close();
+
+UserMapper mapper2 = sqlSession2.getMapper(UserMapper.class);
+User user2 = mapper2.getUserById(1);
+System.out.println(user2);
+System.out.println(user1 == user2); //true
+sqlSession2.close();
+```
+
+执行结果，只查询一次，因为有二级缓存，
+
+```shell
+Opening JDBC Connection
+Created connection 1007309018.
+Setting autocommit to false on JDBC Connection [com.mysql.jdbc.JDBC4Connection@3c0a50da]
+==>  Preparing: select * from mybatis.user where id = ?; 
+==> Parameters: 1(Integer)
+<==    Columns: id, name, password
+<==        Row: 1, 张三, 123456
+<==      Total: 1
+User{id=1, name='张三', psw='123456'}
+Resetting autocommit to true on JDBC Connection [com.mysql.jdbc.JDBC4Connection@3c0a50da]
+Closing JDBC Connection [com.mysql.jdbc.JDBC4Connection@3c0a50da]
+Returned connection 1007309018 to pool.
+Cache Hit Ratio [com.zhang.dao.UserMapper]: 0.5
+User{id=1, name='张三', psw='123456'}
+true
+```
+
+
+
+- 如果Cache没有指定只读，接口类需要序列化。
+
+  ```shell
+  Error serializing object.  Cause: java.io.NotSerializableException: com.zhang.pojo.User
+  ```
+
+  ```xml
+  <cache
+    eviction="FIFO"
+    flushInterval="60000"
+    size="512"
+    readOnly="true"/>
+  ```
+
+  
+
+## 4.	自定义缓存-Ehcache
+
+> Ehcache是一种广泛使用的开源Java分布式缓存。主要面向通用缓存。
+
+1. 导入Ehcache的包
+
+   ```xml
+   <dependency>
+       <groupId>org.mybatis.caches</groupId>
+       <artifactId>mybatis-ehcache</artifactId>
+       <version>1.2.0</version>
+   </dependency>
+   ```
+   
+2. 引入自定cache
+
+   ```xml
+   <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+   ```
+
+3. 可以自定义缓存配置文件
+
+   
 

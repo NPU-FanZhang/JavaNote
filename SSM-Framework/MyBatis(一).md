@@ -84,6 +84,11 @@
                <artifactId>lombok</artifactId>
                <version>1.18.20</version>
            </dependency>
+           <dependency>
+               <groupId>org.mybatis.caches</groupId>
+               <artifactId>mybatis-ehcache</artifactId>
+               <version>1.2.0</version>
+           </dependency>
        </dependencies>
    ```
 
