@@ -304,10 +304,220 @@ name:   也是别名,并且可以取多个别名,各种分隔符都可以用
 
 ## 1、	构造器注入
 
+就是前面使用的有参和无参形式的构造方法。
 
+```xml
+<constructor-arg name="name" value="ZFan"></constructor-arg>
+<bean id="hello" class="com.zhang.pojo.Hello">
+   <!--如果是基本数据类型,用value赋值
+	如果是引用数据类型,用ref赋值-->
+  	<property name="str" value="Spring"/>
+    <constructor-arg name="name" value="ZFan"></constructor-arg>
+</bean>
+```
 
 ## 2、	`Set方式注入` 【重点】
 
+依赖注入：Set注入
 
+- 依赖：Bean对象的创建，依赖于容器。
+- 注入：Bean对象的所有属性，都依赖容器来注入。
+
+各种属性使用Set注入的用法，例子：
+
+`Student-POJO`
+
+```java
+public class Student {
+    private String name;
+    private Address address;
+    private String[] books;
+    private List<String> hobbies;
+    private Map<String,String> card;
+    private Set<String> games;
+    private String wife;
+    private Properties info;
+    ///后面还有各种set方法
+}
+```
+
+`applicationContext.xml`
+
+```xml
+<bean id="address" class="com.zhang.pojo.Address">
+    <property name="address" value="xian xianyang"></property>
+ </bean>
+<!--各个数据类型的set注入方式-->
+<bean id="student" class="com.zhang.pojo.Student">
+    <!--基本类型-->
+    <property name="name" value="F4N"></property>
+    <!--对象类型-->
+    <property name="address" ref="address"></property>
+    <!--数组类型-->
+    <property name="books">
+        <array>
+            <value>红楼梦</value>
+            <value>西游记</value>
+            <value>水浒传</value>
+        </array>
+    </property>
+    <!--list类型-->
+    <property name="hobbies">
+        <list>
+            <value>music</value>
+            <value>moises</value>
+            <value>run</value>
+        </list>
+    </property>
+    <!--Map类型-->
+    <property name="card">
+        <map>
+            <entry key="身份证" value="611232112512020001"></entry>
+            <entry key="银行卡" value="465521846556"></entry>
+        </map>
+    </property>
+    <!--Set类型-->
+    <property name="games" >
+        <set>
+            <value>LOL</value>
+            <value>COC</value>
+        </set>
+    </property>
+    <!--NULL值注入-->
+    <property name="wife">
+        <null></null>
+    </property>
+    <!--properties类型-->
+    <property name="info" >
+        <props>
+            <prop key="url">jdbc:mysql3213</prop>
+            <prop key="username">root</prop>
+            <prop key="password">123456</prop>
+        </props>
+    </property>
+</bean>
+```
 
 ## 3、	扩展注入
+
+*XML Shortcut with the `p-namespace`和XML Shortcut with the `c-namespace`*
+
+### 1.	P命名空间`p-namespace`
+
+*p-namespace注入对应的set注入。*
+
+在`applicationContext.xml`头部加入`xmlns:p="http://www.springframework.org/schema/p"`p命名空间的依赖。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+        
+        <bean id="user" class="com.zhang.pojo.User" p:name="Zhang" p:age="18"></bean>
+</beans>
+```
+
+
+
+### 2.	C命名空间`c-namespace`
+
+*c-namespace注入对应的构造器注入。*
+
+在`applicationContext.xml`头部加入`xmlns:c="http://www.springframework.org/schema/c"`c命名空间的依赖。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+        
+        <bean id="user2" class="com.zhang.pojo.User" c:name="ZZZ" c:age="17"></bean>
+</beans>
+```
+
+
+
+# 6、	Bean的作用域（Bean Scopes）
+
+Bean的作用域主要包含以下几种作用域：
+
+| Scope                                                        | Description                                                  |
+| :----------------------------------------------------------- | :----------------------------------------------------------- |
+| [singleton](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-scopes-singleton) | (Default) Scopes a single bean definition to a single object instance for each Spring IoC container. |
+| [prototype](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-scopes-prototype) | Scopes a single bean definition to any number of object instances. |
+| [request](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-scopes-request) | Scopes a single bean definition to the lifecycle of a single HTTP request. That is, each HTTP request has its own instance of a bean created off the back of a single bean definition. Only valid in the context of a web-aware Spring `ApplicationContext`. |
+| [session](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-scopes-session) | Scopes a single bean definition to the lifecycle of an HTTP `Session`. Only valid in the context of a web-aware Spring `ApplicationContext`. |
+| [application](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-factory-scopes-application) | Scopes a single bean definition to the lifecycle of a `ServletContext`. Only valid in the context of a web-aware Spring `ApplicationContext`. |
+| [websocket](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#websocket-stomp-websocket-scope) | Scopes a single bean definition to the lifecycle of a `WebSocket`. Only valid in the context of a web-aware Spring `ApplicationContext`. |
+
+1. singleton单例模式（Spring默认机制）
+
+   ```xml
+   <bean id="user" class="com.zhang.pojo.User" p:name="Zhang" p:age="18" scope="singleton"></bean>
+   ```
+
+   每次getBean只会使用同一个对象。
+
+   ```java
+   @Test
+   public void TestUser(){
+       ApplicationContext Context = new ClassPathXmlApplicationContext("applicationContext.xml");
+       User user = Context.getBean("user", User.class);
+       User user2 = Context.getBean("user", User.class);
+       System.out.println(user2);
+       System.out.println(user);
+       System.out.println(user == user2);
+   }
+   ```
+
+   ```shell
+   User{name='Zhang', age=18}
+   User{name='Zhang', age=18}
+   true
+   ```
+
+2. prototype原型模式
+
+   每次getBean都会产生一个新的对象。
+   
+   ```xml
+<bean id="user" class="com.zhang.pojo.User" p:name="Zhang" p:age="18" scope="prototype"></bean>
+   ```
+   
+   ```java
+   @Test
+   public void TestUser(){
+       ApplicationContext Context = new ClassPathXmlApplicationContext("applicationContext.xml");
+       User user = Context.getBean("user", User.class);
+       User user2 = Context.getBean("user", User.class);
+       System.out.println(user2);
+       System.out.println(user);
+       System.out.println(user == user2);
+}
+   ```
+   
+   ```shell
+   User{name='Zhang', age=18}
+   User{name='Zhang', age=18}
+   false
+   ```
+   
+3. request、session、application等都是在WEB中进行使用的。
+
+
+
+
+
+
+
+
+
+
+
+
+
