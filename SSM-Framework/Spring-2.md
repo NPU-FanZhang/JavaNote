@@ -293,12 +293,162 @@ public void test(){
 - 抽象角色：一般会使用接口或者抽象类来解决。比如一起租房这件事。
 - 真实角色：被代理的角色。比如房东。
 - 代理角色：代理真实角色，代理真实角色会，会做一些附属操作。比如中介，帮忙写合同。
-- 客户：访问代理角色的人。比如客户。
+- 客户：访问代理角色的人，比如客户。
 
 
 
+代码实现:
 
+1. 接口。
 
+   ```java
+   public interface Rent {
+       public void rent();
+   }
+   ```
 
+2. 真实角色。
+
+   ```java
+   public class Landlord implements Rent{
+       public void rent() {
+           System.out.println("我要出租房");
+       }
+   }
+   ```
+
+3. 代理角色。
+
+   ```java
+   public class Proxy {
+       private Landlord landlord;
+       public Proxy() {
+       }
+       public Proxy(Landlord landlord) {
+           this.landlord = landlord;
+       }
+       public void rent(){
+           landlord.rent();
+           seeHouse();
+           hetong();
+           fee();
+       }
+       public void seeHouse(){
+           System.out.println("中介带看房");
+       }
+       public void hetong(){
+           System.out.println("签合同");
+       }
+       public void fee(){
+           System.out.println("收中介费");
+       }
+   }
+   ```
+
+4. 客户端访问代理角色。
+
+   ```java
+   public class Client {
+       public static void main(String[] args) {
+           Landlord landlord = new Landlord();//房东
+           Proxy proxy = new Proxy(landlord);//中介
+           proxy.rent();
+       }
+   }
+   ```
+
+在实际编程中的代理:
+
+1. 接口类
+
+   ```java
+   public interface UserService {
+       public void add();
+       public void delete();
+       public void update();
+       public void query();
+   }
+   ```
+
+2. 接口实现类
+
+   ```java
+   public class UserServiceImpl implements UserService {
+       public void add() {System.out.println("增加了一个用户");}
+       public void delete() {System.out.println("删除了一个用户");}
+       public void update() {System.out.println("修改了一个用户");}
+       public void query() {System.out.println("查询了一个用户");}
+   }
+   ```
+
+3. 如果此时想要在实现的基础上，增加输出日志的功能，但是又不希望改变之前的代码，哪么就可以使用Proxy类来实现切面一样的效果。
+
+   ```java
+   public class UserServiceProxy implements UserService{
+       private UserServiceImpl userService;
+       
+       public UserServiceProxy(UserServiceImpl userService) {
+           this.userService = userService;
+       }
+       public void printLog(String msg){
+           System.out.println("[DEBUG]使用了"+msg+"方法");
+       }
+       public void add() {
+           printLog("Add");
+           userService.add();
+       }
+       public void delete() {
+           printLog("delete");
+           userService.delete();
+       }
+       public void update() {
+           printLog("update");
+           userService.update();
+       }
+       public void query() {
+           printLog("query");
+           userService.query();
+       }
+   }
+   ```
+
+4. 在调用时，只需要调用代理类
+
+   ```java
+   public class Client {
+       public static void main(String[] args) {
+           UserServiceImpl userService = new UserServiceImpl();
+           //如果不使用代理类,哪么就直接调用add方法。
+           //userService.add();
+           UserServiceProxy serviceProxy = new UserServiceProxy(userService);
+           serviceProxy.add();
+       }
+   }
+   ```
+
+5. 我们可以发现，修改的代码量还是很大，哪么就出现了动态代理，底层使用反射实现。
 
 ## 2、	动态代理
+
+
+
+-[] asd 
+
+
+
+-[ x ] asd a
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
