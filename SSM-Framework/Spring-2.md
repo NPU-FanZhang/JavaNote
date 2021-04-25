@@ -445,7 +445,7 @@ public void test(){
 
 ---
 
-#### `InvocationHandler`
+`InvocationHandler`
 
 InvocationHandler处于`java.lang.reflect`包下。
 
@@ -469,7 +469,7 @@ Object invoke(Object proxy, Method method, Object[] args)throws Throwable
 
 ---
 
-#### `Proxy`
+`Proxy`
 
 
 
