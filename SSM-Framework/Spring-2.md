@@ -430,23 +430,46 @@ public void test(){
 
 ## 2、	动态代理
 
-
-
--[] asd 
-
-
-
--[ x ] asd a
-
-
+- 动态代理和静态代理的角色一致。
+- **动态代理的代理类是动态生成的**，不是我们手动写好的！
+- 动态代理分为两大类：基于接口的动态代理，基于类的动态代理：
+  - 基于接口的 -- JDK动态代理【我们使用JDK实现】
+  - 基于类 -- cglib
+  - Java字节码实现 -- JAVAssit
 
 
 
+### **基于接口的 -- JDK动态代理**
 
+需要了解两个类：`Proxy`代理和`InvocationHandler`调用处理程序接口。
 
+---
 
+#### `InvocationHandler`
 
+InvocationHandler处于`java.lang.reflect`包下。
 
+public interface InvocationHandler
+
+- `InvocationHandler` 是代理实例的*调用处理程序* 实现的接口。
+
+- 每个代理实例都具有一个关联的调用处理程序。对代理实例调用方法时，将对方法调用进行编码并将其指派到它的调用处理程序的 `invoke` 方法。
+
+| 返回      | **方法摘要**                                                 |
+| --------- | ------------------------------------------------------------ |
+| ` Object` | `invoke` （Object proxy, Method method, Object[] args)   在代理实例上处理方法调用并返回结果。 |
+
+```java
+//proxy - 在其上调用方法的代理实例
+//method - 对应于在代理实例上调用的接口方法的 Method 实例。
+//args - 包含传入代理实例上方法调用的参数值的对象数组，如果接口方法不使用参数，则为 null。
+//return - 从代理实例的方法调用返回的值。
+Object invoke(Object proxy, Method method, Object[] args)throws Throwable
+```
+
+---
+
+#### `Proxy`
 
 
 
