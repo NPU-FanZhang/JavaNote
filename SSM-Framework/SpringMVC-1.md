@@ -154,3 +154,100 @@ SpringMVC的特点：
 
 
 ![mvc](SpringMVC-1.assets/mvc.png)
+
+
+
+## 1、创建第一个SpringMVC程序
+
+1. 整个项目的目录如下
+
+   ![image-20210427211748836](SpringMVC-1.assets/image-20210427211748836.png)
+
+2. 配置`web\WEB-INF\web.xml`
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+            version="4.0">
+       <servlet>
+           <servlet-name>springmvc</servlet-name>
+           <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+           <init-param>
+               <param-name>contextConfigLocation</param-name>
+               <param-value>classpath:springmvc-servlet.xml</param-value>
+           </init-param>
+           <!--启动级别1-->
+           <load-on-startup>1</load-on-startup>
+       </servlet>
+       <!--/ 匹配所有请求:不包括jsp-->
+       <!--/* 匹配所有请求:包括jsp-->
+       <servlet-mapping>
+           <servlet-name>springmvc</servlet-name>
+           <url-pattern>/</url-pattern>
+       </servlet-mapping>
+   </web-app>
+   ```
+
+3. 配置`src\main\resources\springmvc-servlet.xml`
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8" ?>
+   <beans xmlns="http://www.springframework.org/schema/beans"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd">
+   
+       <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>
+       <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/>
+   
+       <!--视图解析器:DispatcherServlet给他的ModelAndView-->
+       <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" id="internalResourceViewResolver">
+           <!--前缀-->
+           <property name="prefix" value="/WEB-INF/jsp/"/>
+           <!--后缀-->
+           <property name="suffix" value=".jsp"/>
+       </bean>
+   
+       <!--handler-->
+       <bean id="/hello" class="com.zhang.controller.HelloController"/>
+   </beans>
+   ```
+
+4. 编写`src\main\java\com\zhang\controller\HelloController.java`
+
+   ```java
+   public class HelloController implements Controller {
+       public ModelAndView handleRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
+           //ModelAndView 视图和模型
+           ModelAndView modelAndView = new ModelAndView();
+           modelAndView.addObject("msg","HelloSpringMVC");
+           modelAndView.setViewName("hello");//WEB_INF/jsp/hello.jsp
+           return modelAndView;
+       }
+   }
+   ```
+
+5. Web页面的文件如下
+
+   ![image-20210427211704820](SpringMVC-1.assets/image-20210427211704820.png)
+
+6. 启动Tomcat进行测试
+
+   ![image-20210427211825868](SpringMVC-1.assets/image-20210427211825868.png)
+
+---
+
+可能遇到的问题:
+
+1. 出现访问404
+
+   - 查看控制台输出,是不是缺少Jar包
+
+   - 查看项目输出结构，看IDEA有没有自动生成lib文件夹，如果没有，手动添加
+
+     ![image-20210427212052294](SpringMVC-1.assets/image-20210427212052294.png)
+
+   - 重启Tomcat
+
