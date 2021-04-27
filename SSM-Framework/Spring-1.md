@@ -89,8 +89,14 @@ GitHub地址:https://github.com/spring-projects/spring-framework
        <artifactId>spring-jdbc</artifactId>
        <version>5.3.6</version>
    </dependency>
-   
+   <dependency>
+       <groupId>org.aspectj</groupId>
+       <artifactId>aspectjweaver</artifactId>
+       <version>1.9.6</version>
+   </dependency>
    ```
+
+   
 
 2. 创建一个空的Maven项目。
 
