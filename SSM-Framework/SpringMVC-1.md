@@ -431,7 +431,9 @@ SpringMVC的特点：
 
 4. 访问
 
-   ​	![image-20210428142300057](SpringMVC-1.assets/image-20210428142300057.png)
+   ![image-20210428142300057](SpringMVC-1.assets/image-20210428142300057.png)
+
+   ​	
 
 
 
@@ -525,7 +527,7 @@ public interface Controller {
 
 
 
-## 2、使用注解来写Controller
+## 2、	使用注解来写Controller
 
 - 下面几个注解作用相同，是在不同的控制器中使用的注解。
 
@@ -560,3 +562,412 @@ public interface Controller {
       }
   }
   ```
+
+
+
+# 5、RESTful风格
+
+`REST`（英文：**`Representational State Transfer`**，简称REST）描述了一个架构样式的网络系统。
+
+RESTFUL是一种网络应用程序的设计风格和开发方式，基于HTTP，可以使用XML格式定义或JSON格式定义。
+
+RESTFUL适用于移动互联网厂商作为业务接口的场景，实现第三方[OTT](https://baike.baidu.com/item/OTT/9960940)调用移动网络资源的功能，动作类型为新增、变更、删除所调用资源。
+
+---
+
+传统的URL带参访问方式：
+
+```java
+@RequestMapping("/add")
+public String test(int a, int b, Model model){
+    int res = a + b;
+    model.addAttribute("msg","answer is "+res);
+    return "test";
+}
+```
+
+![image-20210507094823007](SpringMVC-1.assets/image-20210507094823007.png)
+
+---
+
+主要使用`@PathVariable`注解
+
+RESTFUL风格的URL带参访问方式：
+
+```java
+@RequestMapping("/add/{a}/{b}")
+public String test(@PathVariable int a,@PathVariable int b, Model model){
+    int res = a + b;
+    model.addAttribute("msg","answer is "+res);
+    return "test";
+}
+```
+
+输入URL后回车，默认调用的是GET方法：
+
+![image-20210507095422909](SpringMVC-1.assets/image-20210507095422909.png)
+
+如果想要调用DELET，UPDATE等方法：
+
+```java
+    //这种显示的定义
+    //@RequestMapping(value = "/add/{a}/{b}",method = RequestMethod.DELETE)
+    //也可以使用组合的注解,
+	//@GetMapping()、@PutMapping()、 @PostMapping()
+	//下面这种只会处理POST请求
+    @PostMapping("/add/{a}/{b}")
+    public String test(@PathVariable int a,@PathVariable int b, Model model){
+        int res = a + b;
+        model.addAttribute("msg","answer is "+res);
+        return "test";
+    }
+```
+
+---
+
+RESTful风格最大的好处是安全，并且也使代码简介，高效。
+
+
+
+# 6、重定向和转发
+
+在servlet中的重定向和转发的方式也可以使用，但是需要在Controller中传入`HttpServletRequest` `HttpServletResponse` 参数，然后调用方式就和以前一致。
+
+```java
+@Controller
+public class ModelTest {
+    @RequestMapping("/m1")
+    public void test(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        HttpSession session = request.getSession();
+        System.out.println(session.getId());
+        request.getRequestDispatcher("WEB-INF/jsp/test.jsp").forward(request,response);
+        //return "test";
+    }
+}
+```
+
+---
+
+SpringMVC中的转发和重定向，本身不需要视图解析器。
+
+1. 先注释掉视图解析器`src\main\resources\spring-servlet.xml`
+
+   ```xml
+   <!--    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" id="internalResourceViewResolver">-->
+   <!--        <property name="prefix" value="/WEB-INF/jsp/"></property>-->
+   <!--        <property name="suffix" value=".jsp"/>-->
+   <!--    </bean>-->
+   ```
+
+2. 在Controller中写转发和重定向，没有视图解析器，需要加上前后缀：
+
+   ```java
+   @RequestMapping("/m2")
+   public String test2(){
+       //URL不变,说明是转发方式
+       return "/WEB-INF/jsp/test.jsp";
+   }
+   @RequestMapping("/m3")
+   public String test3(){
+       //URL不变,转发方式
+       return "forward:/WEB-INF/jsp/test.jsp";
+   }
+   @RequestMapping("/m4")
+   public String test4(){
+       //重定向
+       return "redirect:index.jsp";
+   }
+   ```
+
+加上视图解析器后的转发和重定向：
+
+```java
+@RequestMapping("/m2")
+public String test2(){
+    //是转发方式
+    return "test";
+}
+@RequestMapping("/m4")
+public String test4(){
+    //重定向
+    return "redirect:index.jsp";
+}
+```
+
+
+
+# 7、数据处理
+
+## 1、数据传入
+
+1. 提交的域名中参数名和Controller方法中变量名一致
+
+   ```shell
+   http://localhost:8080/test5?name=zhang
+   ```
+
+   不需要特殊处理:
+
+   ```java
+   @RequestMapping("/test5")
+   public String test5(String name){
+       System.out.println(name);
+       //输出zhang
+       return "test";
+   }
+   ```
+
+2. 提交的域名中参数名称和方法中变量名不一致
+
+   ```bash
+   http://localhost:8080/test6?username=zhangF
+   ```
+
+   使用注解`@RequestParam("username")`进行参数名的映射
+
+   ```java
+   @RequestMapping("/test6")
+   public String test6(@RequestParam("username") String name){
+       System.out.println(name);
+       return "test";
+   }
+   ```
+
+3. 提交的参数是一个对象
+
+   ```java
+   //http://localhost:8080/user/t2?id=213&name=zafd&age=13
+   //如果传入的是对象,在URL传入的参数和POJO类匹配时,则可以正常传入
+   //如果一致,则返回null或0
+   @GetMapping("/t2")
+   public String test2(User user){
+       System.out.println(user);
+       //User(age=13, name=zafd, id=213)
+       return "test";
+   }
+   ```
+
+## 2、数据传出
+
+1. 通过`ModelAndView`
+
+   ```java
+   public ModelAndView handleRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
+       ModelAndView modelAndView = new ModelAndView();
+       modelAndView.addObject("msg","Controller1");
+       modelAndView.setViewName("test");
+       return modelAndView;
+   }
+   ```
+
+2. 通过`Model`
+
+   ```java
+   //http://localhost:8080/user/t1?name=zasd
+   @GetMapping("/t1")
+   public String test1(String name, Model model){
+       //1.接收前端参数
+       System.out.println("前端接收的参数为"+name);
+       //2.将返回结果传递给前端
+       model.addAttribute("msg",name);
+       //3.视图跳转
+       return "test";
+   }
+   ```
+
+3. 通过`ModelMap`
+
+   使用方式和`Model`基本一致
+
+   ```java
+   public class ModelMap extends LinkedHashMap<String, Object>
+   public class ExtendedModelMap extends ModelMap implements Model
+   ```
+
+   `ModelAndView`				-- 	可以在存储数据`ModelMap`的同时，进行设置返回的视图
+
+   `ModelMap`							--	继承了`LinkedHashMap`
+
+   `Model`									--	精简了`ModelMap`
+
+
+
+## 3、乱码处理
+
+乱码问题可遇不可求，所以看运气。
+
+但是一些常见的乱码问题一般都可以解决。
+
+---
+
+1. Tomcat乱码，`apache-tomcat-9.0.45\conf\server.xml`
+
+   ```xml
+   <Connector URIEncoding="utf-8" port="8080"  protocol="HTTP/1.1"
+                  connectionTimeout="20000"
+                  redirectPort="8443" />
+   ```
+
+2. Tomcat日志乱码，`apache-tomcat-9.0.45\conf\logging.properties`
+
+   将其中的`UTF-8`替换为`GBK`
+
+3. 前端传入的数据乱码，就是前端输入汉字，到后台变成乱码，可以通过过滤器进行设置。
+
+   - 自定义Servlet过滤器
+
+     1. 重写`Filter`类方法`src\main\java\com\zhang\filter\EncodingFilter.java`
+
+        ```java
+        public class EncodingFilter implements Filter {
+            public void init(FilterConfig filterConfig) throws ServletException { }
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+                servletRequest.setCharacterEncoding("utf-8");
+                servletResponse.setCharacterEncoding("utf-8");
+                filterChain.doFilter(servletRequest,servletResponse);
+            }
+            public void destroy() { }
+        }
+        ```
+
+     2. 在web.xml中进行声明
+
+        ```xml
+        <filter>
+            <filter-name>encoding</filter-name>
+            <filter-class>com.zhang.filter.EncodingFilter</filter-class>
+        </filter>
+        <filter-mapping>
+            <filter-name>encoding</filter-name>
+            <url-pattern>/*</url-pattern>
+        </filter-mapping>
+        ```
+
+        注意最后的为 `<url-pattern>/*</url-pattern>`为/*否则不会过滤jsp
+
+   - 使用SpringMVC过滤器
+
+     在web.xml中进行声明
+
+     ```xml
+     <filter>
+         <filter-name>encoding</filter-name>
+         <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+         <init-param>
+             <param-name>encoding</param-name>
+             <param-value>utf-8</param-value>
+         </init-param>
+     </filter>
+     
+     <filter-mapping>
+         <filter-name>encoding</filter-name>
+         <url-pattern>/*</url-pattern>
+     </filter-mapping>
+     ```
+
+     注意最后的为 `<url-pattern>/*</url-pattern>`为/*否则不会过滤jsp
+
+
+
+# 8、JSON
+
+`JSON`(JavaScript Object Notation, JS 对象简谱) 是一种轻量级的数据交换格式。
+
+- 简洁和清晰的层次结构使得 JSON 成为理想的数据交换语言。 
+
+- 易于人阅读和编写，同时也易于机器解析和生成，并有效地提升网络传输效率。
+
+## JSON 和 JS 对象互转
+
+要实现从JSON字符串转换为JS对象，使用 JSON.parse() 方法：
+
+```javascript
+var obj = JSON.parse('{"a": "Hello", "b": "World"}'); 
+//结果是 {a: 'Hello', b: 'World'}
+```
+
+要实现从JS对象转换为JSON字符串，使用 JSON.stringify() 方法：
+
+```js
+var json = JSON.stringify({a: 'Hello', b: 'World'});
+//结果是 '{"a": "Hello", "b": "World"}'
+```
+
+## Jackson
+
+主要是使用Jackson的ObjectMapper，将
+
+```java
+ObjectMapper mapper = new ObjectMapper();
+String str = mapper.writeValueAsString(user);
+```
+
+
+
+首先要引入依赖包:
+
+```xml
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.12.3</version>
+</dependency>
+```
+
+然后创建POJO类，创建Controller类
+
+```java
+@Controller
+public class UserController {
+    @RequestMapping("/j1")
+    @ResponseBody//配合类的@Controller注解使用,加这个注解,不会走视图解析器,会直接返回一个字符串
+    public String json1() throws JsonProcessingException {
+        User user = new User(1312,"张",123);
+        //Jackson的ObjectMapper
+        ObjectMapper mapper = new ObjectMapper();
+        String str = mapper.writeValueAsString(user);
+        return str;
+    }
+}
+```
+
+在`src\main\resources\springmvc-servlet.xml`解决乱码问题
+
+```xml
+<!--JSON解决乱码问题-->
+<mvc:annotation-driven>
+    <mvc:message-converters>
+        <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+            <constructor-arg value="UTF-8"/>
+        </bean>
+        <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+            <property name="objectMapper">
+                <bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
+                    <property name="failOnEmptyBeans" value="false"/>
+                </bean>
+            </property>
+        </bean>
+    </mvc:message-converters>
+</mvc:annotation-driven>
+```
+
+访问后对象变为字符串
+
+![image-20210507171733082](SpringMVC-1.assets/image-20210507171733082.png)
+
+日期类型的操作:
+
+```java
+@RequestMapping("/j2")
+public String json2() throws JsonProcessingException {
+    Date date = new Date();
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyy-mm-dd HH-mm-ss");
+    
+    //Jackson的ObjectMapper
+    ObjectMapper mapper = new ObjectMapper();
+    return mapper.writeValueAsString(simpleDateFormat.format(date));
+}
+```
+
+![image-20210507173451525](SpringMVC-1.assets/image-20210507173451525.png)
+
