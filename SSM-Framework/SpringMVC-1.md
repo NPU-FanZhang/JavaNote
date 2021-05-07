@@ -971,3 +971,49 @@ public String json2() throws JsonProcessingException {
 
 ![image-20210507173451525](SpringMVC-1.assets/image-20210507173451525.png)
 
+
+
+## FastJson
+
+首先导入依赖:
+
+```xml
+<dependency>
+    <groupId>com.alibaba</groupId>
+    <artifactId>fastjson</artifactId>
+    <version>1.2.76</version>
+</dependency>
+```
+
+使用直接调用即可`JSON.toJSONString(objects)`:
+
+```java
+@RequestMapping("/j4")
+public String json4(){
+    ArrayList<User> objects = new ArrayList<>();
+    User user = new User(1312,"张",123);
+    User user1 = new User(1312,"张1",123);
+    User user2 = new User(1312,"张2",123);
+    User user3 = new User(1312,"张3",123);
+    User user4 = new User(1312,"张4",123);
+    objects.add(user);
+    objects.add(user1);
+    objects.add(user2);
+    objects.add(user3);
+    objects.add(user4);
+
+    String string = JSON.toJSONString(objects);
+    return string;
+}
+```
+
+常用方法:
+
+```java
+JSON.parse()
+JSON.parseObject()
+JSON.parseArray()
+JSON.toJSONString()
+JSON.toJSON()
+```
+
