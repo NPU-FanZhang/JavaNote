@@ -308,28 +308,30 @@
       同时，xml中不能有中文，如果有中文也可能报这个错误！！！！！需要将IDEA的编码格式设置为`UTF-8`，有三四处需要设置。
 
    ```xml
-      <resources>
-        <resource>
-          <directory>src/main/resources</directory>
-          <excludes>
-            <exclude>**/*.properties</exclude>
-            <exclude>**/*.xml</exclude>
-          </excludes>
-          <filtering>true</filtering>
-        </resource>
-        <resource>
-          <directory>src/main/java</directory>
-          <includes>
-            <include>**/*.properties</include>
-            <include>**/*.xml</include>
-          </includes>
-          <filtering>true</filtering>
-        </resource>
-   </resources>
+       <build>
+           <resources>
+               <resource>
+                   <directory>src/main/resources</directory>
+                   <excludes>
+                       <exclude>**/*.properties</exclude>
+                       <exclude>**/*.xml</exclude>
+                   </excludes>
+                   <filtering>false</filtering>
+               </resource>
+               <resource>
+                   <directory>src/main/java</directory>
+                   <includes>
+                       <include>**/*.properties</include>
+                       <include>**/*.xml</include>
+                   </includes>
+                   <filtering>false</filtering>
+               </resource>
+           </resources>
+       </build>
    ```
 
    
-
+   
 2. ```shell
    org.apache.ibatis.binding.BindingException: Type interface com.zhang.dao.UserDao is not known to the MapperRegistry.
    ```
