@@ -82,6 +82,7 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
           <artifactId>jstl</artifactId>
           <version>1.2</version>
       </dependency>
+  
       <dependency>
           <groupId>org.mybatis</groupId>
           <artifactId>mybatis</artifactId>
@@ -92,6 +93,7 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
           <artifactId>mybatis-spring</artifactId>
           <version>2.0.2</version>
       </dependency>
+  
       <dependency>
           <groupId>org.springframework</groupId>
           <artifactId>spring-webmvc</artifactId>
@@ -102,6 +104,7 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
           <artifactId>spring-jdbc</artifactId>
           <version>5.3.6</version>
       </dependency>
+  
       <dependency>
           <groupId>org.projectlombok</groupId>
           <artifactId>lombok</artifactId>
@@ -116,15 +119,15 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
   <build>
       <resources>
           <resource>
-              <directory>src/main/resources</directory>
-              <excludes>
-                  <exclude>**/*.properties</exclude>
-                  <exclude>**/*.xml</exclude>
-              </excludes>
+              <directory>src/main/java</directory>
+              <includes>
+                  <include>**/*.properties</include>
+                  <include>**/*.xml</include>
+              </includes>
               <filtering>false</filtering>
           </resource>
           <resource>
-              <directory>src/main/java</directory>
+              <directory>src/main/resources</directory>
               <includes>
                   <include>**/*.properties</include>
                   <include>**/*.xml</include>
@@ -148,7 +151,7 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
   ```properties
   jdbc.driver=com.mysql.jdbc.Driver
   #Mysql8.0+需要在url中增加时区配置 &serverTimezone=Asia/Shanghai
-  jdbc.url=jdbc:mysql://localhost:3306/ssmbuild?useSSL=true&useUnicode=true&characterEncoding=utf8
+  jdbc.url=jdbc:mysql://localhost:3306/ssmbuild?useSSL=false&useUnicode=true&characterEncoding=utf8
   jdbc.username=root
   jdbc.password=123456
   ```
@@ -158,9 +161,10 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
   ```xml
   <?xml version="1.0" encoding="UTF-8" ?>
   <!DOCTYPE configuration
-          PUBLIC "-//mybatis.prg//DTD Config 3.0//EN"
+          PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
           "http://mybatis.org/dtd/mybatis-3-config.dtd">
   <configuration>
+  
   </configuration>
   ```
 
@@ -171,7 +175,7 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
   <beans xmlns="http://www.springframework.org/schema/beans"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http:http://www.springframework.org/schema/beans/spring-beans.xsd">
+          http://www.springframework.org/schema/beans/spring-beans.xsd">
   
   </beans>
   ```
@@ -221,7 +225,7 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
   ```xml-dtd
   <?xml version="1.0" encoding="UTF-8" ?>
   <!DOCTYPE mapper
-          PUBLIC "-//mybatis.prg//DTD Config 3.0//EN"
+          PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
           "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   <mapper namespace="com.zhang.dao.BookMapper">
   
@@ -229,24 +233,29 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
           insert into ssmbuild.books( bookName, bookCounts, detail)
           VALUES (#{bookName},#{bookCounts},#{detail});
       </insert>
+  
       <delete id="deleteBookByID" parameterType="int">
           delete from ssmbuild.books where bookID=#{bookId};
       </delete>
+  
       <update id="updateBook" parameterType="Books">
           update ssmbuild.books
           set bookName=#{bookName},
               bookCounts=#{bookCounts},
               detail=#{detail}
-          where bookID=#{bookID}
+          where bookID=#{bookID};
       </update>
+  
       <select id="queryBookByID" resultType="Books">
           select *
           from ssmbuild.books where bookID=#{bookId};
       </select>
+  
       <select id="queryAllBooks" resultType="Books">
           select *
           from ssmbuild.books;
       </select>
+  
   </mapper>
   ```
 
@@ -282,7 +291,9 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns:context="http://www.springframework.org/schema/context"
          xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http:http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/context
+          https://www.springframework.org/schema/context/spring-context.xsd">
   
       <!--1.关联数据库配置文件-->
       <context:property-placeholder location="classpath:database.properties"/>
@@ -327,13 +338,16 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
 - 创建`spring-service.xml`，将`service`层配置进来
 
   ```xml
-  <?xml version="1.0" encoding="UTF-8" ?>
   <beans xmlns="http://www.springframework.org/schema/beans"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:mvc="http://www.springframework.org/schema/mvc"
          xmlns:context="http://www.springframework.org/schema/context"
          xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http:http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
-  
+          https://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/mvc
+          https://www.springframework.org/schema/mvc/spring-mvc.xsd
+          http://www.springframework.org/schema/context
+          https://www.springframework.org/schema/context/spring-context.xsd">
       <!--1.扫描service下的包-->
       <context:component-scan base-package="com.zhang.service"/>
   
@@ -361,17 +375,17 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
 - 配置`src\main\resources\spring-mvc.xml`并添加入主配置文件。
 
   ```xml
-  <?xml version="1.0" encoding="UTF-8" ?>
+  <?xml version="1.0" encoding="UTF-8"?>
   <beans xmlns="http://www.springframework.org/schema/beans"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns:context="http://www.springframework.org/schema/context"
          xmlns:mvc="http://www.springframework.org/schema/mvc"
+         xmlns:context="http://www.springframework.org/schema/context"
          xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http:http://www.springframework.org/schema/beans/spring-beans.xsd
-          http://www.springframework.org/schema/context
-          https://www.springframework.org/schema/context/spring-context.xsd
+          https://www.springframework.org/schema/beans/spring-beans.xsd
           http://www.springframework.org/schema/mvc
-          http://www.springframework.org/schema/cache/spring-mvc.xsd">
+          https://www.springframework.org/schema/mvc/spring-mvc.xsd
+          http://www.springframework.org/schema/context
+          https://www.springframework.org/schema/context/spring-context.xsd">
   
       <!--1.注解驱动-->
       <mvc:annotation-driven/>
@@ -398,15 +412,16 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
            version="4.0">
       <!--DispatcherServlet-->
       <servlet>
-          <servlet-name>springmvc</servlet-name>
+          <servlet-name>SpringMVC</servlet-name>
           <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
           <init-param>
               <param-name>contextConfigLocation</param-name>
-              <param-value>classpath:spring-mvc.xml</param-value>
+              <param-value>classpath:applicationContext.xml</param-value>
           </init-param>
+          <load-on-startup>1</load-on-startup>
       </servlet>
       <servlet-mapping>
-          <servlet-name>springmvc</servlet-name>
+          <servlet-name>SpringMVC</servlet-name>
           <url-pattern>/</url-pattern>
       </servlet-mapping>
       <!--乱码过滤-->
@@ -475,9 +490,50 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
 
 
 
+# 报错处理
+
+##  class path resource [applicationContext.xml] cannot be opened because it does not exist
+
+1. web.xml路径配置不正确。
+
+2. build project工程后没有将资源文件resources下的配置文件拷贝到out目录下面的classes目录下。
+
+   解决方法参考:https://blog.csdn.net/sinat_38301574/article/details/80465693
 
 
 
+## java.lang.IllegalArgumentException: protocol = https host = null
+
+xml中的头部网址配错
+
+
+
+## Type org.apache.ibatis.session.SqlSessionFactory not present
+
+mybatis依赖导入有问题，注意版本。
+
+```xml
+<dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis</artifactId>
+    <version>3.5.2</version>
+</dependency>
+<dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis-spring</artifactId>
+    <version>2.0.2</version>
+</dependency>
+```
+
+
+
+## Path does not chain with any of the trust anchors
+
+src\main\resources\database.properties中`useSSL=true`设为false
+
+```properties
+jdbc.url=jdbc:mysql://localhost:3306/ssmbuild?useSSL=false&useUnicode=true&characterEncoding=utf8
+```
 
 
 
