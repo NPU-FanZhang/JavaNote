@@ -164,7 +164,18 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
           PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
           "http://mybatis.org/dtd/mybatis-3-config.dtd">
   <configuration>
-  
+      <settings>
+          <setting name="logImpl" value="STDOUT_LOGGING"/>
+      </settings>
+      <!--配置数据源,交给Spring做-->
+      <typeAliases>
+          <package name="com.zhang.pojo"/>
+      </typeAliases>
+      <mappers>
+          <!--dao里面的xml与接口名一致的话,可以使用class绑定
+              如果不一致,使用resource绑定-->
+          <mapper class="com.zhang.dao.BookMapper"></mapper>
+      </mappers>
   </configuration>
   ```
 
@@ -176,6 +187,10 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://www.springframework.org/schema/beans
           http://www.springframework.org/schema/beans/spring-beans.xsd">
+  
+      <import resource="classpath:spring-dao.xml"/>
+      <import resource="classpath:spring-mvc.xml"/>
+      <import resource="classpath:spring-service.xml"/>
   
   </beans>
   ```
@@ -476,21 +491,378 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
   }
   ```
 
-- 创建JSP页面。
+- 创建JSP页面，`index.jsp`及`web\WEB-INF\jsp\allBook.jsp`。
+
+  `index.jsp`
+
+  ```jsp
+  <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+  <html>
+    <head>
+      <title>$Title$</title>
+    </head>
+    <body>
+    <h3>
+      <a href="${pageContext.request.contextPath}/book/allBook">进入书籍页面</a>
+    </h3>
+    </body>
+  </html>
+  ```
+
+  `allBook.jsp`
+
+  ```jsp
+  <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+  <html>
+  <head>
+      <title>书籍展示页面</title>
+  </head>
+  <body>
+  <h1>书籍展示页面</h1>
+  ${list}
+  </body>
+  </html>
+  ```
 
 - 配置Tomcat，添加lib
 
 - 运行
 
+![image-20210511111501058](SSM Integration.assets/image-20210511111501058.png)
+
+**初步成功!**
+
+---
+
+进行页面展示美化：`allBook.jsp`
+
+```jsp
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>书籍展示页面</title>
+    <%--BootStrasp--%>
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<h1>书籍展示页面</h1>
+
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="page-header">
+                <h1>
+                    <small>书籍列表</small>
+                </h1>
+            </div>
+        </div>
+    </div>
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>书籍编号</th>
+                        <th>书籍名称</th>
+                        <th>书籍数量</th>
+                        <th>书籍详情</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="book" items="${list}">
+                        <tr>
+                            <td>${book.bookID}</td>
+                            <td>${book.bookName}</td>
+                            <td>${book.bookCounts}</td>
+                            <td>${book.detail}</td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+```
+
+![image-20210511112910807](SSM Integration.assets/image-20210511112910807.png)
 
 
 
 
 
+# 8、实现增加业务
+
+1. 先增加跳转页面，跳转到新增页面。
+
+   ```jsp
+   <div class="row">
+       <div class="col-md-4 column">
+           <a class="btn btn-primary" href="${pageContext.request.contextPath}/book/toAddPage">增加书籍</a>
+       </div>
+   </div>
+   ```
+
+2. `BookController.java`增加跳转控制
+
+   ```java
+   //跳转到增加书籍页面
+   @RequestMapping("/toAddPage")
+   public String toAddPage(){
+       return "addBook";
+   }
+   ```
+
+3. 新建增加图书JSP页面，`web\WEB-INF\jsp\addBook.jsp`。
+
+   ```jsp
+   <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+   <html>
+   <head>
+       <title>Title</title>
+       <%--BootStrasp--%>
+       <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+   </head>
+   <body>
+   <h1>增加书籍</h1>
+   <div class="container">
+       <div class="row clearfix">
+           <div class="col-md-12 column">
+               <div class="page-header">
+                   <h1>
+                       <small>新增书籍</small>
+                   </h1>
+               </div>
+           </div>
+       </div>
+       <form action="${pageContext.request.contextPath}/book/addBook" method="get">
+           <div class="form-group">
+               <label >书籍名称:</label>
+               <input type="text" name="bookName" class="form-control" required>
+           </div>
+           <div class="form-group">
+               <label>书籍数量:</label>
+               <input type="text" name="bookCounts" class="form-control" required>
+           </div>
+           <div class="form-group">
+               <label>书籍描述:</label>
+               <input type="text" name="detail" class="form-control" required >
+           </div>
+           <div class="form-group">
+               <input type="submit" class="form-control" value="添加书籍">
+           </div>
+       </form>
+   </div>
+   </body>
+   </html>
+   ```
+
+4. `BookController.java`增加添加控制
+
+   ```java
+   //添加书籍的请求
+   @RequestMapping("/addBook")
+   public  String addBook(Books books){
+       System.out.println("addBook->"+books);
+       //addBook->Books(bookID=0, bookName=水浒, bookCounts=123, detail=四大名著)
+       bookService.addBook(books);
+       return "redirect:/book/allBook";
+   }
+   ```
+
+![image-20210511144550666](SSM Integration.assets/image-20210511144550666.png)
+
+![image-20210511144600826](SSM Integration.assets/image-20210511144600826.png)
+
+# 9、实现修改业务
+
+1. 先增加跳转页面，跳转到修改页面。
+
+   ```jsp
+   <td>
+       <a href="${pageContext.request.contextPath}/book/toUpdatePage?id=${book.bookID}">修改</a>
+       &nbsp;|&nbsp;
+       <a href="#">删除</a>
+   </td>
+   ```
+
+2. `BookController.java`增加跳转控制
+
+   ```java
+   //跳转到修改书籍页面
+   @RequestMapping("/toUpdatePage")
+   public String toUpdatePage(int id,Model model){
+       Books books = bookService.queryBookByID(id);
+       model.addAttribute("Qbooks",books);
+       return "updateBook";
+   }
+   ```
+   
+3. 新建修改图书JSP页面，`web\WEB-INF\jsp\updateBook.jsp`。
+
+   修改页面需要增加修改书籍的ID。
+
+   ```jsp
+   <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+   <html>
+   <head>
+       <title>Title</title>
+       <%--BootStrasp--%>
+       <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+   </head>
+   <body>
+   <h1>修改书籍</h1>
+   
+   <div class="container">
+       <div class="row clearfix">
+           <div class="col-md-12 column">
+               <div class="page-header">
+                   <h1>
+                       <small>修改书籍</small>
+                   </h1>
+               </div>
+           </div>
+       </div>
+       <form action="${pageContext.request.contextPath}/book/updateBook" method="get">
+           <%--前端传递隐藏域提交ID--%>
+           <input type="hidden" name="bookID" value="${Qbooks.bookID}">
+           <div class="form-group">
+               <label >书籍名称:</label>
+               <input type="text" name="bookName" value="${Qbooks.bookName}" class="form-control" required>
+           </div>
+           <div class="form-group">
+               <label>书籍数量:</label>
+               <input type="text" name="bookCounts" value="${Qbooks.bookCounts}" class="form-control" required>
+           </div>
+           <div class="form-group">
+               <label>书籍描述:</label>
+               <input type="text" name="detail" value="${Qbooks.detail}" class="form-control" required >
+           </div>
+           <div class="form-group">
+               <input type="submit" class="form-control" value="修改书籍">
+           </div>
+       </form>
+   </div>
+   </body>
+   </html>
+   ```
+
+4. `BookController.java`增加更新控制
+
+   ```java
+   //修改书籍的请求
+   @RequestMapping("/updateBook")
+   public  String updateBook(Books books){
+       System.out.println("updateBook->"+books);
+       //updateBook->Books(bookID=1, bookName=Java, bookCounts=12, detail=从入门到放弃)
+       bookService.updateBook(books);
+       return "redirect:/book/allBook";
+   }
+   ```
+
+![image-20210511152822225](SSM Integration.assets/image-20210511152822225.png)
+
+![image-20210511152832568](SSM Integration.assets/image-20210511152832568.png)
+
+# 10、实现删除业务
+
+1. 跳转到删除请求。
+
+   ```jsp
+   <td>
+       <a href="${pageContext.request.contextPath}/book/toUpdatePage?id=${book.bookID}">修改</a>
+       &nbsp;|&nbsp;
+       <a href="${pageContext.request.contextPath}/book/delBook/${book.bookID}">删除</a>
+   </td>
+   ```
+
+2. `BookController.java`增加删除控制
+
+   ```java
+   //删除书籍的请求
+   @RequestMapping("/delBook/{bookId}")
+   public  String delBook(@PathVariable("bookId") int id){
+       System.out.println("delBook->"+id);
+       //delBook->4
+       bookService.deleteBookByID(id);
+       return "redirect:/book/allBook";
+   }
+   ```
+
+   
+
+# 11、实现查询功能
+
+实现一个完全新增的功能，应该从下往上开发，`Dao`->`Service`->`Controller`。
+
+1. `Dao`接口增加`src\main\java\com\zhang\dao\BookMapper.java`。
+
+   ```java
+   List<Books> queryBookByName(String bookName);
+   ```
+
+2. `Dao`实现XML`src\main\java\com\zhang\dao\BookMapper.xml`。
+
+   ```xml
+   <select id="queryBookByName" resultType="Books">
+       select *
+       from ssmbuild.books where bookName like concat('%',#{bookName},'%');
+   </select>
+   ```
+
+3. `Service`增加接口`src\main\java\com\zhang\service\BookService.java`。
+
+   ```java
+   List<Books>  queryBookByName(String bookName);
+   ```
+
+4. `Service`增加接口的实现`src\main\java\com\zhang\service\BookServiceImpl.java`。
+
+   ```java
+   public List<Books> queryBookByName(String bookName) {
+       return bookMapper.queryBookByName(bookName);
+   }
+   ```
+
+5. `BookController.java`增加查询控制。
+
+   ```java
+   //按名查询
+   @RequestMapping("/queryBook")
+   public String queryBookByName(String queryBookName,Model model){
+       List<Books> books = bookService.queryBookByName(queryBookName);
+       //List<Books> books = bookService.queryAllBooks();
+       model.addAttribute("list",books);
+       return "allBook";
+       //return "redirect:/book/allBook";
+   }
+   ```
+
+6. JSP页面展示。
+
+   ```jsp
+   <div class="row">
+       <div class="col-md-4 column">
+           <a class="btn btn-primary" href="${pageContext.request.contextPath}/book/toAddPage">增加书籍</a>
+       </div>
+       <div class="col-md-4 column" >
+           <form action="${pageContext.request.contextPath}/book/queryBook" method="get" style="display:flex">
+               <input type="text" name="queryBookName" class="form-control" placeholder="输入查询书籍的名称">
+               <input type="submit" value="查询" class="btn btn-primary">
+           </form>
+       </div>
+   </div>
+   ```
 
 
 
-# 报错处理
+
+
+#  报错处理
+
+他妈的这些傻逼错误查了一早上！后面我再自己手敲配置文件头，直接吃屎。
 
 ##  class path resource [applicationContext.xml] cannot be opened because it does not exist
 
@@ -500,13 +872,9 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
 
    解决方法参考:https://blog.csdn.net/sinat_38301574/article/details/80465693
 
-
-
 ## java.lang.IllegalArgumentException: protocol = https host = null
 
-xml中的头部网址配错
-
-
+xml中的头部网址配错。
 
 ## Type org.apache.ibatis.session.SqlSessionFactory not present
 
@@ -525,8 +893,6 @@ mybatis依赖导入有问题，注意版本。
 </dependency>
 ```
 
-
-
 ## Path does not chain with any of the trust anchors
 
 src\main\resources\database.properties中`useSSL=true`设为false
@@ -534,6 +900,5 @@ src\main\resources\database.properties中`useSSL=true`设为false
 ```properties
 jdbc.url=jdbc:mysql://localhost:3306/ssmbuild?useSSL=false&useUnicode=true&characterEncoding=utf8
 ```
-
 
 
