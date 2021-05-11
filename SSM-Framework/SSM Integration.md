@@ -14,6 +14,8 @@
 
 JDK：`JDK 1.8`
 
+GitHub 项目代码：git@github.com:NPU-FanZhang/SSMIntegrationDemo.git
+
 ---
 
 
@@ -900,5 +902,4 @@ src\main\resources\database.properties中`useSSL=true`设为false
 ```properties
 jdbc.url=jdbc:mysql://localhost:3306/ssmbuild?useSSL=false&useUnicode=true&characterEncoding=utf8
 ```
-
 
