@@ -1017,3 +1017,80 @@ JSON.toJSONString()
 JSON.toJSON()
 ```
 
+
+
+# 9、拦截器
+
+过滤器和拦截器的区别：
+
+- 拦截器是基于java的反射机制【动态代理】的，而过滤器是基于函数回调。
+- 拦截器不依赖与servlet容器，过滤器依赖与servlet容器。
+- 拦截器只能对action请求起作用，而过滤器则可以对几乎所有的请求起作用。
+- 拦截器可以访问action上下文、值栈里的对象，而过滤器不能访问。
+- 在action的生命周期中，拦截器可以多次被调用，而过滤器只能在容器初始化时被调用一次。
+- **拦截器可以获取IOC容器中的各个bean，而过滤器就不行，这点很重要，在拦截器里注入一个service，可以调用业务逻辑。**
+
+- 过滤器和拦截器触发时机不一样:
+  - 过滤器是在请求进入容器后，但请求进入servlet之前进行预处理的。请求结束返回也是，是在servlet处理完后，返回给前端之前。
+
+
+
+## 自定义拦截器
+
+- 先写`Controller`请求`src\main\java\com\zhang\controller\TestController.java`
+
+```java
+@RestController
+public class TestController {
+    @GetMapping("/t1")
+    public String test(){
+        System.out.println("TestController==>Run");
+        return "OK";
+    }
+}
+```
+
+- 自定义拦截器实现`src\main\java\com\zhang\config\myInterceptor.java`
+
+```java
+public class myInterceptor implements HandlerInterceptor {
+    //return true会放行,执行下一个拦截器
+    //return false不会放行,不执行下一个拦截器
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("---preHandle==>RUN---");
+        return true;
+    }
+
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("---postHandle==>RUN---");
+    }
+
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("---afterCompletion==>RUN---");
+    }
+}
+```
+
+- 在`src\main\resources\applicationContext.xml`中配置拦截器
+
+```xml
+<!--拦截器配置-->
+<mvc:interceptors>
+    <mvc:interceptor>
+        <!--/**拦截这个请求下的所有请求-->
+        <!--/ 拦截这个请求-->
+        <mvc:mapping path="/**"/>
+        <!--自定义的拦截器-->
+        <bean class="com.zhang.config.myInterceptor"/>
+    </mvc:interceptor>
+</mvc:interceptors>
+```
+
+访问t1请求
+
+![image-20210512113826300](SpringMVC-1.assets/image-20210512113826300.png)
+
+
+
+## 拦截器实现登录验证
+
