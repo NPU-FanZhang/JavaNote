@@ -4,15 +4,24 @@
 
 # 1、什么是Spring Boot
 
+Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications that you can "just run".
 
+We take an opinionated view of the Spring platform and third-party libraries so you can get started with minimum fuss. Most Spring Boot applications need minimal Spring configuration.
 
+## Features
 
+- Create ==stand-alone== Spring applications
+- Embed Tomcat, Jetty or Undertow directly (no need to deploy WAR files)
+- Provide opinionated 'starter' dependencies to simplify your build configuration
+- Automatically configure Spring and 3rd party libraries whenever possible
+- Provide production-ready features such as metrics, health checks, and externalized configuration
+- Absolutely no code generation and no requirement for XML configuration
 
 
 
 # 2、SpringBoot基本原理
 
-
+<img src="SpringBoot-1.assets/6912735-51aa162747fcdc3d.png" alt="img"  />
 
 
 
@@ -24,7 +33,7 @@ Springboot的核心配置文件为`application.properties`，也可以是`applic
 
 配置文件名必须为`application`。
 
-SpringBoot中强调JavaConfig，就是使用Java类进行环境的配置。
+Spring Boot中强调JavaConfig，就是使用Java类进行环境的配置。
 
 
 
@@ -159,5 +168,95 @@ SpringBoot中强调JavaConfig，就是使用Java类进行环境的配置。
 
 ## 2、多环境配置及配置文件
 
-SpringBoot可以包含多个配置文件，并且有加载优先级
+SpringBoot可以包含多个配置文件，并且有加载优先级。
+
+
+
+## 3、首页配置
+
+
+
+
+
+
+
+# 4、thymeleaf模板引擎
+
+单纯的SpringBoot项目无法进入页面，需要导入模板引擎来进行渲染
+
+引入依赖:
+
+```xml
+<dependency>
+    <groupId>org.thymeleaf.extras</groupId>
+    <artifactId>thymeleaf-extras-java8time</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.thymeleaf</groupId>
+    <artifactId>thymeleaf-spring5</artifactId>
+</dependency>
+```
+
+查看源码`ThymeleafProperties`，说明文件需要放在templates目录下
+
+```java
+public static final String DEFAULT_PREFIX = "classpath:/templates/";
+public static final String DEFAULT_SUFFIX = ".html";
+```
+
+后面的`html`文件可以使用`thymeleaf`语法进行开发，类似于Vue，就是没有完全分离。
+
+
+
+# 5、SpringMVC扩展配置
+
+==以下只是几个例子，说明SpringBoot的配置方法。==
+
+自定义类，实现MVC的自定义配置`src\main\java\com\zhang\springbootdemo\config\MyConfig.java`
+
+```java
+//扩展MVC配置
+//@Configuration相当于传统的xml配置文件，如果有些第三方库需要用到xml文件，建议仍然通过@Configuration类作为项目的配置主类
+@Configuration
+public class MyConfig implements WebMvcConfigurer {
+    
+    //ViewResolver实现了视图解析器接口的类,我们就可以看做视图解析器
+    @Bean
+    public ViewResolver myViewResolver(){
+        return new MyViewResolver();
+    }
+    //自定义视图解析器
+    public static class MyViewResolver implements ViewResolver{
+        @Override
+        public View resolveViewName(String viewName, Locale locale) throws Exception {
+            return null;
+        }
+    }
+}
+```
+
+自定义某些数据格式: `src\main\resources\application.yaml`
+
+```yaml
+#自定义日期格式
+spring:
+  mvc:
+    format:
+      date: dd/MM/yyyy
+```
+
+自定义视图跳转:`src\main\java\com\zhang\springbootdemo\config\MyConfig.java`
+
+```java
+//扩展MVC配置
+//@Configuration相当于传统的xml配置文件，如果有些第三方库需要用到xml文件，建议仍然通过@Configuration类作为项目的配置主类
+@Configuration
+public class MyConfig implements WebMvcConfigurer {
+    //自定义视图跳转
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/kuang").setViewName("test");
+    }
+}
+```
 
