@@ -1,6 +1,6 @@
 # MyBatis
 
-![MyBatis logo](MyBatis(二).assets/mybatis-logo.png)
+![MyBatis logo](asset/MyBatis-2.assets/mybatis-logo.png)
 
 [TOC]
 
@@ -108,7 +108,7 @@ dataSource 元素使用标准的 `JDBC` 数据源接口来配置 JDBC 连接对�
 
 2. 在核心配置文件中引入
 
-   <img src="MyBatis(二).assets/image-20210416144044326.png" alt="image-20210416144044326" style="zoom:150%;" />
+   <img src="asset/MyBatis-2.assets/image-20210416144044326.png" alt="image-20210416144044326" style="zoom:150%;" />
 
    ```xml
    <configuration>
@@ -248,11 +248,11 @@ public class Author {
 
 > 作用域和生命周期类别是至关重要的，因为错误的使用会导致非常严重的`并发问题`。
 
-<img src="MyBatis(二).assets/image-20210416153800317.png" alt="image-20210416153800317" style="zoom:67%;" />
+<img src="asset/MyBatis-2.assets/image-20210416153800317.png" alt="image-20210416153800317" style="zoom:67%;" />
 
 并发情况下：
 
-![image-20210416154644162](MyBatis(二).assets/image-20210416154644162.png)
+![image-20210416154644162](asset/MyBatis-2.assets/image-20210416154644162.png)
 
 
 
@@ -285,7 +285,7 @@ public class Author {
 
 如果数据库字段名（password）和代码属性名（psw）不一致，会导致查找结果出错。
 
-![image-20210416160722205](MyBatis(二).assets/image-20210416160722205.png)
+![image-20210416160722205](asset/MyBatis-2.assets/image-20210416160722205.png)
 
 原因：`mapper.xml`中代码如下
 
@@ -339,7 +339,7 @@ select id,name,psw from mybatis.user where id = 1;
 </mapper>
 ```
 
-![image-20210416162548403](MyBatis(二).assets/image-20210416162548403.png)
+![image-20210416162548403](asset/MyBatis-2.assets/image-20210416162548403.png)
 
  
 
@@ -353,11 +353,11 @@ select id,name,psw from mybatis.user where id = 1;
 
 设置输出日志，一个字母，一个空格都不能错。
 
-![image-20210416164602149](MyBatis(二).assets/image-20210416164602149.png)
+![image-20210416164602149](asset/MyBatis-2.assets/image-20210416164602149.png)
 
 设置日志之后，运行输出就会变成：
 
-![image-20210416164758488](MyBatis(二).assets/image-20210416164758488.png)
+![image-20210416164758488](asset/MyBatis-2.assets/image-20210416164758488.png)
 
 日志类型：
 
@@ -413,7 +413,7 @@ Returned connection 388043093 to pool.
 </settings>
 ```
 
-![image-20210416165351842](MyBatis(二).assets/image-20210416165351842.png)
+![image-20210416165351842](asset/MyBatis-2.assets/image-20210416165351842.png)
 
 1. 先导入`LOG4J`的包。
 
@@ -484,7 +484,7 @@ Returned connection 388043093 to pool.
 
 4. 执行Test
 
-   ![image-20210416171059945](MyBatis(二).assets/image-20210416171059945.png)
+   ![image-20210416171059945](asset/MyBatis-2.assets/image-20210416171059945.png)
 
 
 
@@ -517,7 +517,7 @@ Process finished with exit code 0
 
 会在配置的目录下生成log文件:
 
-![image-20210416172251476](MyBatis(二).assets/image-20210416172251476.png)
+![image-20210416172251476](asset/MyBatis-2.assets/image-20210416172251476.png)
 
 log日志的输出目录可以在`log4j.properties`中设置:
 

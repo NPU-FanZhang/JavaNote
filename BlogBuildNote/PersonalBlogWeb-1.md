@@ -45,13 +45,13 @@ npm config set registry https://registry.npm.taobao.org
    vue ui
    ```
 
-   ![image-20210513215054049](PersonalBlogWeb-1.assets/image-20210513215054049.png)
+   ![image-20210513215054049](asset/PersonalBlogWeb-1.assets/image-20210513215054049.png)
 
    其中路由是否选择HTML5 History Mode，可以选也可以不选，在Router/index.js中可以进行设置。
 
 3. 创建好的项目，使用VScode打开，输入`npm run serve`运行。
 
-   ![image-20210513220043045](PersonalBlogWeb-1.assets/image-20210513220043045.png)
+   ![image-20210513220043045](asset/PersonalBlogWeb-1.assets/image-20210513220043045.png)
 
 4. 前端Vue空项目搭建完成，项目目录如下。
 
@@ -91,7 +91,7 @@ npm config set registry https://registry.npm.taobao.org
 
 2. 文件目录中产生
 
-   ![image-20210518165345246](PersonalBlogWeb-1.assets/image-20210518165345246.png)
+   ![image-20210518165345246](asset/PersonalBlogWeb-1.assets/image-20210518165345246.png)
 
    其中的语法为`Vue2`的语法，需要进行调整。
 

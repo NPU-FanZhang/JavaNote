@@ -15,7 +15,7 @@
 
 - 创建一个空的Maven项目, 然后配置依赖, Servlet项目需要添加两个依赖
 
-  <img src="JavaWeb笔记-Servlet.assets/image-20210412103200535.png" alt="image-20210412103200535" style="zoom: 67%;" />
+  <img src="asset/JavaWeb笔记-Servlet.assets/image-20210412103200535.png" alt="image-20210412103200535" style="zoom: 67%;" />
 
   > 配置时注意Maven仓库的问题, 我自己并没有能将依赖下载本地仓库的指定目录下, 只下载到了默认路径下, 路径配置在`D:\maven\conf\settings.xml`中
 
@@ -23,7 +23,7 @@
 
 - 创建之后的项目属于刚才创建的空项目的子项目
 
-![image-20210412104207350](JavaWeb笔记-Servlet.assets/image-20210412104207350.png)
+![image-20210412104207350](asset/JavaWeb笔记-Servlet.assets/image-20210412104207350.png)
 
 1. 关于父子项目的理解:
 
@@ -57,7 +57,7 @@
 
    2. 将Maven项目的结构搭建完整
 
-      ![image-20210412105025465](JavaWeb笔记-Servlet.assets/image-20210412105025465.png)
+      ![image-20210412105025465](asset/JavaWeb笔记-Servlet.assets/image-20210412105025465.png)
 
 3. 编写一个Servlet程序
 
@@ -65,7 +65,7 @@
 
       文件结构如下:
 
-      ![image-20210412111005489](JavaWeb笔记-Servlet.assets/image-20210412111005489.png)
+      ![image-20210412111005489](asset/JavaWeb笔记-Servlet.assets/image-20210412111005489.png)
 
       接口类的实现原理如下:
 
@@ -118,7 +118,7 @@
 
    3. 配置Tomcat
 
-      ![image-20210412112844233](JavaWeb笔记-Servlet.assets/image-20210412112844233.png)
+      ![image-20210412112844233](asset/JavaWeb笔记-Servlet.assets/image-20210412112844233.png)
 
       ​	注意项目配置的路径。
       
@@ -126,7 +126,7 @@
 
 ## 3. Servlet原理
 
-![image-20210412133717747](JavaWeb笔记-Servlet.assets/image-20210412133717747.png)
+![image-20210412133717747](asset/JavaWeb笔记-Servlet.assets/image-20210412133717747.png)
 
 
 
@@ -248,15 +248,15 @@ public class error  extends HttpServlet {
 
 效果:
 
-![image-20210412140028620](JavaWeb笔记-Servlet.assets/image-20210412140028620.png)
+![image-20210412140028620](asset/JavaWeb笔记-Servlet.assets/image-20210412140028620.png)
 
-![image-20210412140100594](JavaWeb笔记-Servlet.assets/image-20210412140100594.png)
+![image-20210412140100594](asset/JavaWeb笔记-Servlet.assets/image-20210412140100594.png)
 
 ## 5. ServletContext
 
 > WEB容器启动的时候, 他会为每个WEB程序都创建一个对应的ServletContext对象, 可以通过它来共享数据
 
-![image-20210412150039190](JavaWeb笔记-Servlet.assets/image-20210412150039190.png)
+![image-20210412150039190](asset/JavaWeb笔记-Servlet.assets/image-20210412150039190.png)
 
 doGet方法的一些内置方法:
 
@@ -315,7 +315,7 @@ doGet方法的一些内置方法:
 
 测试效果:需要先访问`http://localhost:8080/Servlet_02_war/hello`然后再访问`http://localhost:8080/Servlet_02_war/getContext`,结果:
 
-![image-20210412151443147](JavaWeb笔记-Servlet.assets/image-20210412151443147.png)
+![image-20210412151443147](asset/JavaWeb笔记-Servlet.assets/image-20210412151443147.png)
 
 ------
 
@@ -368,7 +368,7 @@ doGet方法的一些内置方法:
 
 - 效果如下:
 
-  ![image-20210412154522659](JavaWeb笔记-Servlet.assets/image-20210412154522659.png)
+  ![image-20210412154522659](asset/JavaWeb笔记-Servlet.assets/image-20210412154522659.png)
 
   访问`demo04`转到了`GetServlet`,但路由地址不会变化
 
@@ -406,7 +406,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
 
 效果如下:
 
-![image-20210412164031487](JavaWeb笔记-Servlet.assets/image-20210412164031487.png)
+![image-20210412164031487](asset/JavaWeb笔记-Servlet.assets/image-20210412164031487.png)
 
 
 
@@ -531,7 +531,7 @@ public class FileDownload extends HttpServlet {
 
 效果如下,每五秒刷新一次:
 
-![image-20210413145053210](JavaWeb笔记-Servlet.assets/image-20210413145053210.png)
+![image-20210413145053210](asset/JavaWeb笔记-Servlet.assets/image-20210413145053210.png)
 
 ### 4.实现重定向
 
@@ -543,7 +543,7 @@ public class FileDownload extends HttpServlet {
 >
 > - 用户登录跳转
 
-<img src="JavaWeb笔记-Servlet.assets/image-20210413145820302.png" alt="image-20210413145820302" style="zoom:150%;" />
+<img src="asset/JavaWeb笔记-Servlet.assets/image-20210413145820302.png" alt="image-20210413145820302" style="zoom:150%;" />
 
 ```java
 /*
@@ -556,7 +556,7 @@ resp.sendRedirect("/response_war/download");
 ```
 原理就是请求改变:
 
-<img src="JavaWeb笔记-Servlet.assets/image-20210413153004390.png" alt="image-20210413153004390" style="zoom:67%;" />
+<img src="asset/JavaWeb笔记-Servlet.assets/image-20210413153004390.png" alt="image-20210413153004390" style="zoom:67%;" />
 
 请求转发和重定向的区别?
 
@@ -631,15 +631,15 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
 
 效果如下:
 
-![image-20210413161139775](JavaWeb笔记-Servlet.assets/image-20210413161139775.png)
+![image-20210413161139775](asset/JavaWeb笔记-Servlet.assets/image-20210413161139775.png)
 
 点击提交:
 
-![image-20210413161210780](JavaWeb笔记-Servlet.assets/image-20210413161210780.png)
+![image-20210413161210780](asset/JavaWeb笔记-Servlet.assets/image-20210413161210780.png)
 
 注释重定向后:
 
-![image-20210413162153222](JavaWeb笔记-Servlet.assets/image-20210413162153222.png)
+![image-20210413162153222](asset/JavaWeb笔记-Servlet.assets/image-20210413162153222.png)
 
 ## 7.HttpServletRequest
 
@@ -647,7 +647,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws Se
 
 ### 1.Request的常见方法
 
-![image-20210413163916829](JavaWeb笔记-Servlet.assets/image-20210413163916829.png)
+![image-20210413163916829](asset/JavaWeb笔记-Servlet.assets/image-20210413163916829.png)
 
 ### 2.Request提交案例
 
@@ -721,7 +721,7 @@ protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws S
 
 登录页面:
 
-![image-20210413172025912](JavaWeb笔记-Servlet.assets/image-20210413172025912.png)
+![image-20210413172025912](asset/JavaWeb笔记-Servlet.assets/image-20210413172025912.png)
 
 ```java
 ===============================
@@ -730,7 +730,7 @@ password is 123
 [girl, boy, code]
 ```
 
-![image-20210413185208950](JavaWeb笔记-Servlet.assets/image-20210413185208950.png)
+![image-20210413185208950](asset/JavaWeb笔记-Servlet.assets/image-20210413185208950.png)
 
 
 

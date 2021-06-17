@@ -1,6 +1,6 @@
 # Spring
 
-![spring-logo-9146a4d3298760c2e7e49595184e1975](Spring-1.assets/spring-logo-9146a4d3298760c2e7e49595184e1975.svg)
+![spring-logo-9146a4d3298760c2e7e49595184e1975](asset/Spring-1.assets/spring-logo-9146a4d3298760c2e7e49595184e1975.svg)
 
 
 
@@ -16,7 +16,7 @@
 - SSM: `SpringMVC` + `Spring` + `Mybatis`
 - SSH: Struct2 + Spring + Hibernate
 
-![image-20210421151424320](Spring-1.assets/image-20210421151424320.png)
+![image-20210421151424320](asset/Spring-1.assets/image-20210421151424320.png)
 
 
 
@@ -58,7 +58,7 @@ GitHub地址:https://github.com/spring-projects/spring-framework
 
 ## 2、Spring的框架组成
 
-<img src="Spring-1.assets/image-20210421152620506.png" alt="image-20210421152620506" style="zoom: 80%;" />
+<img src="asset/Spring-1.assets/image-20210421152620506.png" alt="image-20210421152620506" style="zoom: 80%;" />
 
 
 
@@ -100,7 +100,7 @@ GitHub地址:https://github.com/spring-projects/spring-framework
 
 2. 创建一个空的Maven项目。
 
-   ![image-20210421205320965](Spring-1.assets/image-20210421205320965.png)
+   ![image-20210421205320965](asset/Spring-1.assets/image-20210421205320965.png)
 
 3. 创建一个实体类。
 
@@ -492,7 +492,7 @@ Bean的作用域主要包含以下几种作用域：
    每次getBean都会产生一个新的对象。
    
    ```xml
-<bean id="user" class="com.zhang.pojo.User" p:name="Zhang" p:age="18" scope="prototype"></bean>
+   <bean id="user" class="com.zhang.pojo.User" p:name="Zhang" p:age="18" scope="prototype"></bean>
    ```
    
    ```java
@@ -504,7 +504,7 @@ Bean的作用域主要包含以下几种作用域：
        System.out.println(user2);
        System.out.println(user);
        System.out.println(user == user2);
-}
+   }
    ```
    
    ```shell

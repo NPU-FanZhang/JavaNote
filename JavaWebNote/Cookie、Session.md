@@ -56,15 +56,15 @@
 
 第一次进入不显示时间, 刷新后显示:
 
-<img src="Cookie、Session.assets/image-20210413195910170.png" alt="image-20210413195910170"  />
+<img src="asset/Cookie、Session.assets/image-20210413195910170.png" alt="image-20210413195910170"  />
 
 Cookie对应的值:
 
-<img src="Cookie、Session.assets/image-20210413200030481.png" alt="image-20210413200030481" style="zoom:67%;" />
+<img src="asset/Cookie、Session.assets/image-20210413200030481.png" alt="image-20210413200030481" style="zoom:67%;" />
 
 设置Cookie的生存时间后:
 
-![image-20210413200521211](Cookie、Session.assets/image-20210413200521211.png)
+![image-20210413200521211](asset/Cookie、Session.assets/image-20210413200521211.png)
 
 
 
@@ -81,7 +81,7 @@ resp.addCookie(cookie);//响应给客户端
 
 Cookie常用设置
 
-![image-20210413200240179](Cookie、Session.assets/image-20210413200240179.png)
+![image-20210413200240179](asset/Cookie、Session.assets/image-20210413200240179.png)
 
 ### Cookie细节问题
 
@@ -108,7 +108,7 @@ URLDecoder.decode(cookie.getValue(),"utf-8")//解码
 
 ### Cookie验证客户端是否访问过
 
-![image-20210414100140385](Cookie、Session.assets/image-20210414100140385.png)
+![image-20210414100140385](asset/Cookie、Session.assets/image-20210414100140385.png)
 
 ## Session(重点)
 
@@ -159,7 +159,7 @@ URLDecoder.decode(cookie.getValue(),"utf-8")//解码
     }
 ```
 
-![image-20210414100525067](Cookie、Session.assets/image-20210414100525067.png)
+![image-20210414100525067](asset/Cookie、Session.assets/image-20210414100525067.png)
 
 可以在另外一个Servlet接口中获取刚才设置的属性
 
@@ -172,7 +172,7 @@ resp.getWriter().write("Session已经在服务器中存在了,ID为:"+session.ge
 resp.getWriter().write(name.toString());
 ```
 
-![image-20210414100555489](Cookie、Session.assets/image-20210414100555489.png)
+![image-20210414100555489](asset/Cookie、Session.assets/image-20210414100555489.png)
 
 移除属性和注销session
 
@@ -211,4 +211,4 @@ session.invalidate();//注销session,但服务器会自动重建一个
 
 ### Session验证客户是否访问过
 
-![image-20210414100404694](Cookie、Session.assets/image-20210414100404694.png)
+![image-20210414100404694](asset/Cookie、Session.assets/image-20210414100404694.png)

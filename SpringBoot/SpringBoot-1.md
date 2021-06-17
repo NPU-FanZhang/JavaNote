@@ -21,7 +21,7 @@ We take an opinionated view of the Spring platform and third-party libraries so 
 
 # 2、SpringBoot基本原理
 
-<img src="SpringBoot-1.assets/6912735-51aa162747fcdc3d.png" alt="img"  />
+<img src="asset/SpringBoot-1.assets/6912735-51aa162747fcdc3d.png" alt="img"  />
 
 
 

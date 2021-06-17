@@ -165,15 +165,15 @@ public void a1(String name, HttpServletResponse response) throws IOException {
 
 启动
 
-![image-20210512095825112](JavaScript笔记.assets/image-20210512095825112.png)
+![image-20210512095825112](asset/JavaScript笔记.assets/image-20210512095825112.png)
 
 请求发送：
 
-![image-20210512095909800](JavaScript笔记.assets/image-20210512095909800.png)
+![image-20210512095909800](asset/JavaScript笔记.assets/image-20210512095909800.png)
 
 调用顺序如下：
 
-![image-20210512095929431](JavaScript笔记.assets/image-20210512095929431.png)
+![image-20210512095929431](asset/JavaScript笔记.assets/image-20210512095929431.png)
 
 
 
@@ -241,7 +241,7 @@ public List<User> a2(){
 
 初始为空，点击加载数据后发送请求加载。
 
-![image-20210512102847212](JavaScript笔记.assets/image-20210512102847212.png)
+![image-20210512102847212](asset/JavaScript笔记.assets/image-20210512102847212.png)
 
 
 
@@ -323,7 +323,7 @@ public String a3(String username,String pwd){
 
 结果
 
-![image-20210512105651177](JavaScript笔记.assets/image-20210512105651177.png)
+![image-20210512105651177](asset/JavaScript笔记.assets/image-20210512105651177.png)
 
 乱码的话，需要在`src\main\resources\applicationContext.xml`中配置乱码过滤：
 

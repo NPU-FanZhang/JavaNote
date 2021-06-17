@@ -29,7 +29,7 @@ INSERT INTO `user`(`account`,`create_time`,`birth`,`gender`,`name`,`password`) V
 
 1. 初始化时添加的相关依赖
 
-   ![image-20210518113258491](PersonBlogServer-1.assets/image-20210518113258491.png)
+   ![image-20210518113258491](asset/PersonBlogServer-1.assets/image-20210518113258491.png)
 
    
 
@@ -82,7 +82,7 @@ INSERT INTO `user`(`account`,`create_time`,`birth`,`gender`,`name`,`password`) V
 
 5. 启动后台程序，浏览器中访问http://localhost:8181/Login/verify，查看数据。
 
-   ![image-20210518170743716](PersonBlogServer-1.assets/image-20210518170743716.png)
+   ![image-20210518170743716](asset/PersonBlogServer-1.assets/image-20210518170743716.png)
 
 # 3、解决跨域问题
 

@@ -6,7 +6,7 @@
 
 ## Web请求流程
 
-![image-20210408210005403](JavaWeb笔记.assets/image-20210408210005403.png)
+![image-20210408210005403](asset/JavaWeb笔记.assets/image-20210408210005403.png)
 
 ## WEB服务器
 
@@ -32,7 +32,7 @@
 
    > Tomcat文件夹目录:
    >
-   > ![image-20210409144711851](JavaWeb笔记.assets/image-20210409144711851.png)
+   > ![image-20210409144711851](asset/JavaWeb笔记.assets/image-20210409144711851.png)
 
 3. 可能遇到的问题:
 
@@ -44,7 +44,7 @@
    
 4. 配置
 
-   ![image-20210409145302701](JavaWeb笔记.assets/image-20210409145302701.png)
+   ![image-20210409145302701](asset/JavaWeb笔记.assets/image-20210409145302701.png)
 
    可以配置启动的端口号：
 
@@ -250,15 +250,15 @@ HTTP状态码共分为5种类型：
 
 1. 新建模板Maven项目
 
-   ![image-20210409164653526](JavaWeb笔记.assets/image-20210409164653526.png)
+   ![image-20210409164653526](asset/JavaWeb笔记.assets/image-20210409164653526.png)
 
 2. 选择自己配置的xml和仓库
 
-   ![image-20210409164838073](JavaWeb笔记.assets/image-20210409164838073.png)
+   ![image-20210409164838073](asset/JavaWeb笔记.assets/image-20210409164838073.png)
 
 3. 等待下载仓库中的jar包等
 
-   ![image-20210409164519819](JavaWeb笔记.assets/image-20210409164519819.png)
+   ![image-20210409164519819](asset/JavaWeb笔记.assets/image-20210409164519819.png)
 
    ------
 
@@ -270,11 +270,11 @@ HTTP状态码共分为5种类型：
 
    检查一下设置:
 
-   <img src="JavaWeb笔记.assets/image-20210409165928801.png" alt="image-20210409165928801" style="zoom:50%;" />
+   <img src="asset/JavaWeb笔记.assets/image-20210409165928801.png" alt="image-20210409165928801" style="zoom:50%;" />
 
 5. 空项目的初始目录如下:
 
-   ![image-20210409170710986](JavaWeb笔记.assets/image-20210409170710986.png)
+   ![image-20210409170710986](asset/JavaWeb笔记.assets/image-20210409170710986.png)
 
 
 
@@ -282,15 +282,15 @@ HTTP状态码共分为5种类型：
 
 1. 添加Tomcat启动
 
-   ![image-20210409171618212](JavaWeb笔记.assets/image-20210409171618212.png)
+   ![image-20210409171618212](asset/JavaWeb笔记.assets/image-20210409171618212.png)
 
 2. 配置Tomcat
 
-   ![image-20210409172031403](JavaWeb笔记.assets/image-20210409172031403.png)
+   ![image-20210409172031403](asset/JavaWeb笔记.assets/image-20210409172031403.png)
    
 3. 运行Tomcat
 
-   ![image-20210409173248163](JavaWeb笔记.assets/image-20210409173248163.png)
+   ![image-20210409173248163](asset/JavaWeb笔记.assets/image-20210409173248163.png)
 
 
 
@@ -298,7 +298,7 @@ HTTP状态码共分为5种类型：
 
 ------
 
-![image-20210409173714597](JavaWeb笔记.assets/image-20210409173714597.png)
+![image-20210409173714597](asset/JavaWeb笔记.assets/image-20210409173714597.png)
 
 
 

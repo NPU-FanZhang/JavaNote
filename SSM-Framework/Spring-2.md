@@ -1,6 +1,6 @@
 # Spring
 
-![spring-logo-9146a4d3298760c2e7e49595184e1975](Spring-2.assets/spring-logo-9146a4d3298760c2e7e49595184e1975.svg)
+![spring-logo-9146a4d3298760c2e7e49595184e1975](asset/Spring-2.assets/spring-logo-9146a4d3298760c2e7e49595184e1975.svg)
 
 
 
@@ -226,7 +226,7 @@ XML与注解的最佳实践：
 
 例如，我们创建一个配置类：
 
-![image-20210422211816789](Spring-2.assets/image-20210422211816789.png)
+![image-20210422211816789](asset/Spring-2.assets/image-20210422211816789.png)
 
 然后使用注解声明这个类为Spring的配置类：
 
@@ -267,7 +267,7 @@ public void test(){
 
 # 4、代理模式
 
-![image-20210422214821629](Spring-2.assets/image-20210422214821629.png)
+![image-20210422214821629](asset/Spring-2.assets/image-20210422214821629.png)
 
 代理模式的好处：
 
@@ -569,7 +569,7 @@ Spring实现AOP的两种方式:
 
    1. 新建日志类
 
-      ![image-20210426105400948](Spring-2.assets/image-20210426105400948.png)
+      ![image-20210426105400948](asset/Spring-2.assets/image-20210426105400948.png)
 
    2. 重写前置日志
 
@@ -657,7 +657,7 @@ execution(<修饰符模式>?<返回类型模式><方法名模式>(<参数模式>
 
 2. 自定义前置日志和后置日志
 
-   ![image-20210426111447430](Spring-2.assets/image-20210426111447430.png)
+   ![image-20210426111447430](asset/Spring-2.assets/image-20210426111447430.png)
 
    ```java
    public class DiyPointCut {
@@ -713,7 +713,7 @@ execution(<修饰符模式>?<返回类型模式><方法名模式>(<参数模式>
 
 2. 使用注解自定义前置日志和后置日志。
 
-   ![image-20210426113702178](Spring-2.assets/image-20210426113702178.png)
+   ![image-20210426113702178](asset/Spring-2.assets/image-20210426113702178.png)
 
    ```java
    @Aspect//标注这个类是一个切面
@@ -847,7 +847,7 @@ MyBatis-Spring 会帮助你将 MyBatis 代码无缝地整合到 Spring 中。
 
 1. 编写数据源配置
 
-   ![image-20210426151346905](Spring-2.assets/image-20210426151346905.png)
+   ![image-20210426151346905](asset/Spring-2.assets/image-20210426151346905.png)
 
    ```xml
    <!--DataSource:使用Spring的数据源替代Mybatis的配置  c3p0 dbcp druid
@@ -887,7 +887,7 @@ MyBatis-Spring 会帮助你将 MyBatis 代码无缝地整合到 Spring 中。
 
 4. 给结构加实现类【这就是从mybatis转换到Spring的过程】
 
-   ![image-20210426151045793](Spring-2.assets/image-20210426151045793.png)
+   ![image-20210426151045793](asset/Spring-2.assets/image-20210426151045793.png)
 
    ```java
    public class UserMapperImpl implements UserMapper {

@@ -2,7 +2,7 @@
 
 
 
-![spring-logo-9146a4d3298760c2e7e49595184e1975](SpringMVC-1.assets/spring-logo-9146a4d3298760c2e7e49595184e1975.svg)
+![spring-logo-9146a4d3298760c2e7e49595184e1975](assetSpringMVC-1.assets/spring-logo-9146a4d3298760c2e7e49595184e1975.svg)
 
 [TOC]
 
@@ -71,7 +71,7 @@ MVC框架需要做哪些事情?
    
 2. 创建module，新建继承`HttpServlet`的类，实现`doGet`，`doPost`方法重写。
 
-   ![image-20210427153930249](SpringMVC-1.assets/image-20210427153930249.png)
+   ![image-20210427153930249](asset/SpringMVC-1.assets/image-20210427153930249.png)
 
    ```java
    public class HelloServlet extends HttpServlet {
@@ -128,7 +128,7 @@ MVC框架需要做哪些事情?
 
 5. 访问http://localhost:8080/hello?method=add
 
-   ![image-20210427155201932](SpringMVC-1.assets/image-20210427155201932.png)
+   ![image-20210427155201932](asset/SpringMVC-1.assets/image-20210427155201932.png)
 
 
 
@@ -157,7 +157,7 @@ SpringMVC的特点：
 
 1. 整个项目的目录如下
 
-   ![image-20210427211748836](SpringMVC-1.assets/image-20210427211748836.png)
+   ![image-20210427211748836](asset/SpringMVC-1.assets/image-20210427211748836.png)
 
 2. 配置`web\WEB-INF\web.xml`
 
@@ -230,11 +230,11 @@ SpringMVC的特点：
 
 5. Web页面的文件如下
 
-   ![image-20210427211704820](SpringMVC-1.assets/image-20210427211704820.png)
+   ![image-20210427211704820](asset/SpringMVC-1.assets/image-20210427211704820.png)
 
 6. 启动Tomcat进行测试
 
-   ![image-20210427211825868](SpringMVC-1.assets/image-20210427211825868.png)
+   ![image-20210427211825868](asset/SpringMVC-1.assets/image-20210427211825868.png)
 
 ---
 
@@ -246,7 +246,7 @@ SpringMVC的特点：
 
    - 查看项目输出结构，看IDEA有没有自动生成lib文件夹，如果没有，手动添加
 
-     ![image-20210427212052294](SpringMVC-1.assets/image-20210427212052294.png)
+     ![image-20210427212052294](asset/SpringMVC-1.assets/image-20210427212052294.png)
 
    - 重启Tomcat
 
@@ -256,7 +256,7 @@ SpringMVC的特点：
 
 
 
-![mvc](SpringMVC-1.assets/mvc.png)
+![mvc](asset/SpringMVC-1.assets/mvc.png)
 
 **SpringMVC执行流程:**
 
@@ -272,7 +272,7 @@ SpringMVC的特点：
 10. DispatcherServlet对View进行渲染视图（即将模型数据model填充至视图中）。
 11. DispatcherServlet响应用户。
 
-![img](SpringMVC-1.assets/5220087-a1a9a9c3835aa94c.png)
+![img](asset/SpringMVC-1.assets/5220087-a1a9a9c3835aa94c.png)
 
 ---
 
@@ -431,7 +431,7 @@ SpringMVC的特点：
 
 4. 访问
 
-   ![image-20210428142300057](SpringMVC-1.assets/image-20210428142300057.png)
+   ![image-20210428142300057](asset/SpringMVC-1.assets/image-20210428142300057.png)
 
    ​	
 
@@ -586,7 +586,7 @@ public String test(int a, int b, Model model){
 }
 ```
 
-![image-20210507094823007](SpringMVC-1.assets/image-20210507094823007.png)
+![image-20210507094823007](asset/SpringMVC-1.assets/image-20210507094823007.png)
 
 ---
 
@@ -605,7 +605,7 @@ public String test(@PathVariable int a,@PathVariable int b, Model model){
 
 输入URL后回车，默认调用的是GET方法：
 
-![image-20210507095422909](SpringMVC-1.assets/image-20210507095422909.png)
+![image-20210507095422909](asset/SpringMVC-1.assets/image-20210507095422909.png)
 
 如果想要调用DELET，UPDATE等方法：
 
@@ -953,7 +953,7 @@ public class UserController {
 
 访问后对象变为字符串
 
-![image-20210507171733082](SpringMVC-1.assets/image-20210507171733082.png)
+![image-20210507171733082](asset/SpringMVC-1.assets/image-20210507171733082.png)
 
 日期类型的操作:
 
@@ -969,7 +969,7 @@ public String json2() throws JsonProcessingException {
 }
 ```
 
-![image-20210507173451525](SpringMVC-1.assets/image-20210507173451525.png)
+![image-20210507173451525](asset/SpringMVC-1.assets/image-20210507173451525.png)
 
 
 
@@ -1088,7 +1088,7 @@ public class myInterceptor implements HandlerInterceptor {
 
 访问t1请求
 
-![image-20210512113826300](SpringMVC-1.assets/image-20210512113826300.png)
+![image-20210512113826300](asset/SpringMVC-1.assets/image-20210512113826300.png)
 
 
 

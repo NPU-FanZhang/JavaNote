@@ -146,7 +146,7 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
 
 # 3、resources中创建配置和资源文件
 
-![image-20210510112906346](SSM Integration.assets/image-20210510112906346.png)
+![image-20210510112906346](asset/SSM Integration.assets/image-20210510112906346.png)
 
 - 创建数据库连接配置文件database.properties
 
@@ -298,7 +298,7 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
 
 因为IDEA设置配置文件时,自动将配置文件关联了起来，不然需要手动将各个配置文件import到一个文件下。
 
-![image-20210510161534973](SSM Integration.assets/image-20210510161534973.png)
+![image-20210510161534973](asset/SSM Integration.assets/image-20210510161534973.png)
 
 - 创建`spring-dao.xml`，将`dao`层配置进来
 
@@ -465,7 +465,7 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
 
 - 完整的项目结构
 
-  ![image-20210510170718840](SSM Integration.assets/image-20210510170718840.png)
+  ![image-20210510170718840](asset/SSM Integration.assets/image-20210510170718840.png)
 
 
 
@@ -530,7 +530,7 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
 
 - 运行
 
-![image-20210511111501058](SSM Integration.assets/image-20210511111501058.png)
+![image-20210511111501058](asset/SSM Integration.assets/image-20210511111501058.png)
 
 **初步成功!**
 
@@ -589,7 +589,7 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
 </html>
 ```
 
-![image-20210511112910807](SSM Integration.assets/image-20210511112910807.png)
+![image-20210511112910807](asset/SSM Integration.assets/image-20210511112910807.png)
 
 
 
@@ -674,9 +674,9 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
    }
    ```
 
-![image-20210511144550666](SSM Integration.assets/image-20210511144550666.png)
+![image-20210511144550666](asset/SSM Integration.assets/image-20210511144550666.png)
 
-![image-20210511144600826](SSM Integration.assets/image-20210511144600826.png)
+![image-20210511144600826](asset/SSM Integration.assets/image-20210511144600826.png)
 
 # 9、实现修改业务
 
@@ -764,9 +764,9 @@ INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
    }
    ```
 
-![image-20210511152822225](SSM Integration.assets/image-20210511152822225.png)
+![image-20210511152822225](asset/SSM Integration.assets/image-20210511152822225.png)
 
-![image-20210511152832568](SSM Integration.assets/image-20210511152832568.png)
+![image-20210511152832568](asset/SSM Integration.assets/image-20210511152832568.png)
 
 # 10、实现删除业务
 

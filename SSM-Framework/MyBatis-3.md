@@ -1,6 +1,6 @@
 # MyBatis
 
-![MyBatis logo](MyBatis(三).assets/mybatis-logo.png)
+![MyBatis logo](asset/MyBatis-3.assets/mybatis-logo.png)
 
 [TOC]
 
@@ -251,7 +251,7 @@ public void testGetUserWithRowBounds(){
 
 1. IDEA引入plugin
 
-   ![image-20210419205625923](MyBatis(三).assets/image-20210419205625923.png)
+   ![image-20210419205625923](asset/MyBatis-3.assets/image-20210419205625923.png)
 
 2. pom.xml中引入Jar包。
 
@@ -359,7 +359,7 @@ public void testGetUserWithRowBounds(){
 
    其中，多个实体类后，将接口对应的映射文件创建到`resources`下面，并放在与接口类同名的包下，`resources`建包需要使用/区分开。
 
-   ![image-20210420130434137](MyBatis(三).assets/image-20210420130434137.png)
+   ![image-20210420130434137](asset/MyBatis-3.assets/image-20210420130434137.png)
 
 4. `mybatis-config.xml`下进行`mapper`映射
 
@@ -415,7 +415,7 @@ Test中直接调用接口即可。
 
 重点是xml的语句逻辑。
 
-![image-20210420142821689](MyBatis(三).assets/image-20210420142821689.png)
+![image-20210420142821689](asset/MyBatis-3.assets/image-20210420142821689.png)
 
 
 
@@ -447,7 +447,7 @@ public interface StudentMapper {
 </resultMap>
 ```
 
-![image-20210420144709041](MyBatis(三).assets/image-20210420144709041.png)
+![image-20210420144709041](asset/MyBatis-3.assets/image-20210420144709041.png)
 
 结果(因为没有查找tid, 所以tid对应为0):
 
@@ -911,7 +911,7 @@ Blog(id=05fb82806be04f2fac7559d919ad0736, title=Java, author=狂神说, createTi
 3. 什么样的数据适合使用缓存？
    - 经常执行查询操作，不常改变的数据。
 
-![img](MyBatis(三).assets/15778027-a1f96fa617105498.jpg)
+![img](asset/MyBatis-3.assets/15778027-a1f96fa617105498.jpg)
 
 
 
@@ -924,7 +924,7 @@ Blog(id=05fb82806be04f2fac7559d919ad0736, title=Java, author=狂神说, createTi
   - 二级缓存需要手动开启和配置，他是基于namespace级别的缓存。
   - 为了提高可扩展性，Mybatis定义了缓存接口Cache，我们可以通过实现Cache接口来定义二级缓存。
 
-![image-20210421110138098](MyBatis(三).assets/image-20210421110138098.png)
+![image-20210421110138098](asset/MyBatis-3.assets/image-20210421110138098.png)
 
 ## 2.	一级缓存
 
