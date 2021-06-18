@@ -17,7 +17,7 @@
 
 > 服务器通常使用的两套组合是:LAMP(Linux + Apache + Mysql + PHP) 和 LNMP(Linux + Nginx + Mysql + PHP)组合。
 
-​	
+
 
 # Linux安装
 
@@ -40,6 +40,125 @@
 2. 可以修改登录密码。
 
 3. 下载`Xshell`和`Xftp`来进行远程连接和文件传输。
+
+
+
+# Linux 系统启动过程
+
+Linux启动时我们会看到许多启动信息。
+
+Linux系统的启动过程并不是大家想象中的那么复杂，其过程可以分为5个阶段：
+
+- 内核的引导。
+- 运行 init。
+- 系统初始化。
+- 建立终端。
+- 用户登录系统。
+
+>init程序的类型：
+>
+>- **SysV:** init, CentOS 5之前, 配置文件： /etc/inittab。
+>- **Upstart:** init,CentOS 6, 配置文件： /etc/inittab, /etc/init/*.conf。
+>- **Systemd：** systemd, CentOS 7,配置文件： /usr/lib/systemd/system、 /etc/systemd/system。
+
+
+
+## 1、内核引导
+
+> BIOS -> /boot
+
+当计算机打开电源后，首先是BIOS开机自检，按照BIOS中设置的启动设备（通常是硬盘）来启动。
+
+操作系统接管硬件以后，首先读入 /boot 目录下的内核文件。
+
+
+
+## 2、运行init
+
+> /boot -> init程序 -> 读取/etc/inittab -> 运行级别
+
+​	init 进程是系统所有进程的起点，你可以把它比拟成系统所有进程的老祖宗，没有这个进程，系统中任何进程都不会启动。init 程序首先是需要读取配置文件 /etc/inittab。
+
+​	许多程序需要开机启动，在Linux就叫做"守护进程"（daemon）。init进程的一大任务，就是去运行这些开机启动的程序。但是，不同的场合需要启动不同的程序，比如用作服务器时，需要启动Apache，用作桌面就不需要。Linux允许为不同的场合，分配不同的开机启动程序，这就叫做"运行级别"（runlevel）。
+
+​	也就是说，启动时根据"运行级别"，确定要运行哪些程序。Linux系统有7个运行级别(runlevel)：
+
+| 运行级别  | 系统操作                                                    |
+| --------- | ----------------------------------------------------------- |
+| 运行级别0 | 系统停机状态，系统默认运行级别不能设为0，否则不能正常启动   |
+| 运行级别1 | 单用户工作状态，root权限，用于系统维护，禁止远程登陆        |
+| 运行级别2 | 多用户状态(没有NFS)                                         |
+| 运行级别3 | 完全的多用户状态(有NFS)，登陆后进入控制台命令行模式         |
+| 运行级别4 | 系统未使用，保留                                            |
+| 运行级别5 | X11控制台，登陆后进入图形GUI模式                            |
+| 运行级别6 | 系统正常关闭并重启，默认运行级别不能设为6，否则不能正常启动 |
+
+
+
+## 3、系统初始化
+
+> init -> rc.sysinit -> /etc/init.d
+
+​	在init的配置文件中有这么一行： si::sysinit:/etc/rc.d/rc.sysinit　它调用执行了/etc/rc.d/rc.sysinit，而rc.sysinit是一个bash shell的脚本，它主要是完成一些系统初始化的工作，rc.sysinit是每一个运行级别都要首先运行的重要脚本。
+
+​	它主要完成的工作有：激活交换分区，检查磁盘，加载硬件模块以及其它一些需要优先执行任务。
+
+```bshell
+l5:5:wait:/etc/rc.d/rc 5
+```
+
+​	这一行表示以5为参数运行/etc/rc.d/rc，/etc/rc.d/rc是一个Shell脚本，它接受5作为参数，去执行/etc/rc.d/rc5.d/目录下的所有的rc启动脚本，/etc/rc.d/rc5.d/目录中的这些启动脚本实际上都是一些连接文件，而不是真正的rc启动脚本，真正的rc启动脚本实际上都是放在/etc/rc.d/init.d/目录下。
+
+​	而这些rc启动脚本有着类似的用法，它们一般能接受start、stop、restart、status等参数。/etc/rc.d/rc5.d/中的rc启动脚本通常是K或S开头的连接文件，对于以 S 开头的启动脚本，将以start参数来运行。而如果发现存在相应的脚本也存在K打头的连接，而且已经处于运行态了(以/var/lock/subsys/下的文件作为标志)，则将首先以stop为参数停止这些已经启动了的守护进程，然后再重新运行。
+
+​	这样做是为了保证是当init改变运行级别时，所有相关的守护进程都将重启。
+
+​	至于在每个运行级中将运行哪些守护进程，用户可以通过chkconfig或setup中的"System Services"来自行设定。
+
+
+
+## 4、建立终端
+
+> init -> rc.sysinit -> /etc/init.d -> 建立终端
+
+​	rc执行完毕后，返回init。这时基本系统环境已经设置好了，各种守护进程也已经启动了。
+
+​	init接下来会打开6个终端，以便用户登录系统。在inittab中的以下6行就是定义了6个终端：
+
+```shell
+1:2345:respawn:/sbin/mingetty tty1
+2:2345:respawn:/sbin/mingetty tty2
+3:2345:respawn:/sbin/mingetty tty3
+4:2345:respawn:/sbin/mingetty tty4
+5:2345:respawn:/sbin/mingetty tty5
+6:2345:respawn:/sbin/mingetty tty6
+```
+
+​	从上面可以看出在2、3、4、5的运行级别中都将以respawn方式运行mingetty程序，mingetty程序能打开终端、设置模式。
+
+​	同时它会显示一个文本登录界面，这个界面就是我们经常看到的登录界面，在这个登录界面中会提示用户输入用户名，而用户输入的用户将作为参数传给login程序来验证用户的身份。
+
+
+
+## 5、用户登录系统
+
+一般来说，用户的登录方式有三种：
+
+- （1）命令行登录
+
+- （2）ssh登录
+
+- （3）图形界面登录
+
+​	对于运行级别为5的图形方式用户来说，他们的登录是通过一个图形化的登录界面。登录成功后可以直接进入 KDE、Gnome 等窗口管理器而本文主要讲的还是文本方式登录的情况：当我们看到mingetty的登录界面时，我们就可以输入用户名和密码来登录系统了。
+
+​	Linux 的账号验证程序是 login，login 会接收 mingetty 传来的用户名作为用户名参数。然后 login 会对用户名进行分析：如果用户名不是 root，且存在 /etc/nologin 文件，login 将输出 nologin 文件的内容，然后退出。
+
+​	这通常用来系统维护时防止非root用户登录。只有/etc/securetty中登记了的终端才允许 root 用户登录，如果不存在这个文件，则 root 用户可以在任何终端上登录。
+
+​	/etc/usertty文件用于对用户作出附加访问限制，如果不存在这个文件，则没有其他限制。
+
+
 
 
 
@@ -119,13 +238,91 @@ boot  dev   home  lib64  media       opt  root  sbin  sys  usr
 
 ​	比如：A 是 B 的硬链接（A 和 B 都是文件名），则 A 的目录项中的 inode 节点号与 B 的目录项中的 inode 节点号相同，即一个 inode 节点对应两个不同的文件名，两个文件名指向同一个文件，A 和 B 对文件系统来说是完全平等的。删除其中任何一个都不会影响另外一个的访问。
 
-​	硬连接的作用是允许一个文件拥有多个有效路径名，这样用户就可以建立硬连接到重要文件，以防止“误删”的功能。其原因如上所述，因为对应该目录的索引节点有一个以上的连接。只删除一个连接并不影响索引节点本身和其它的连接，只有当最后一个连接被删除后，文件的数据块及目录的连接才会被释放。也就是说，文件真正删除的条件是与之相关的所有硬连接文件均被删除。
+​	硬连接的作用是允许一个文件拥有多个有效路径名，这样用户就可以建立硬连接到重要文件，以防止“误删”的功能。其原因如上所述，因为对应该目录的索引节点有一个以上的连接。只删除一个连接并不影响索引节点本身和其它的连接，只有当最后一个连接被删除后，文件的数据块及目录的连接才会被释放。也就是说，==文件真正删除的条件是与之相关的所有硬连接文件均被删除==。
 
 **软连接**
 
 ​	另外一种连接称之为符号连接（Symbolic Link），也叫软连接。软链接文件有类似于 Windows 的快捷方式。它实际上是一个特殊的文件。在符号连接中，文件实际上是一个文本文件，其中包含的有另一文件的位置信息。
 
 ​	比如：A 是 B 的软链接（A 和 B 都是文件名），A 的目录项中的 inode 节点号与 B 的目录项中的 inode 节点号不相同，A 和 B 指向的是两个不同的 inode，继而指向两块不同的数据块。但是 A 的数据块中存放的只是 B 的路径名（可以根据这个找到 B 的目录项）。A 和 B 之间是“主从”关系，如果 B 被删除了，A 仍然存在（因为两个是不同的文件），但指向的是一个无效的链接。
+
+
+
+==ln创建链接命令==
+
+```bash
+ ln [参数][源文件或目录][目标文件或目录]
+```
+
+选项与参数：
+
+- -b 删除，覆盖以前建立的链接
+- -d 允许超级用户制作目录的硬链接
+- -f 强制执行
+- -i 交互模式，文件存在则提示用户是否覆盖
+- -n 把符号链接视为一般目录
+- -s 软链接(符号链接)
+- -v 显示详细的处理过程
+
+
+
+```shell
+[root@VM-4-9-centos home]# ls
+kdum.sh  lighthouse  test1
+[root@VM-4-9-centos home]# touch f1							#创建文件f1
+[root@VM-4-9-centos home]# ls
+f1  kdum.sh  lighthouse  test1
+[root@VM-4-9-centos home]# ln f1 f2							#创建硬链接f2 指向f1指向的文件
+[root@VM-4-9-centos home]# ls
+f1  f2  kdum.sh  lighthouse  test1
+[root@VM-4-9-centos home]# ls -al
+total 32
+drwxr-xr-x.  4 root       root        4096 Jun 18 16:50 .
+dr-xr-xr-x. 19 root       root        4096 Jun 18 16:50 ..
+-rw-r--r--   2 root       root           0 Jun 18 16:49 f1		#此时f1和f2都是文件,指向同一物理文件
+-rw-r--r--   2 root       root           0 Jun 18 16:49 f2		#此时f1和f2都是文件,指向同一物理文件
+-rwxr-xr-x   1 root       root       14704 Jun 17 20:55 kdum.sh
+drwx------   5 lighthouse lighthouse  4096 May 18 10:10 lighthouse
+drwxr-xr-x   2 root       root        4096 Jun 17 20:56 test1
+[root@VM-4-9-centos home]# ln -s  f1 f3							#创建软链接f3 指向f1
+[root@VM-4-9-centos home]# ls -al
+total 32
+drwxr-xr-x.  4 root       root        4096 Jun 18 16:50 .
+dr-xr-xr-x. 19 root       root        4096 Jun 18 16:50 ..
+-rw-r--r--   2 root       root           0 Jun 18 16:49 f1
+-rw-r--r--   2 root       root           0 Jun 18 16:49 f2
+lrwxrwxrwx   1 root       root           2 Jun 18 16:50 f3 -> f1	#软链接f3 指向f1
+-rwxr-xr-x   1 root       root       14704 Jun 17 20:55 kdum.sh
+drwx------   5 lighthouse lighthouse  4096 May 18 10:10 lighthouse
+drwxr-xr-x   2 root       root        4096 Jun 17 20:56 test1
+[root@VM-4-9-centos home]# echo "hello world" >> f1				#f1文件写入
+[root@VM-4-9-centos home]# cat f1
+hello world
+[root@VM-4-9-centos home]# ls
+f1  f2  f3  kdum.sh  lighthouse  test1
+[root@VM-4-9-centos home]# cat f2								#f2文件也同时写入
+hello world
+[root@VM-4-9-centos home]# cat f3								#f3指向的f1内容
+hello world
+[root@VM-4-9-centos home]# ll
+total 32
+-rw-r--r-- 2 root       root          12 Jun 18 16:51 f1
+-rw-r--r-- 2 root       root          12 Jun 18 16:51 f2
+lrwxrwxrwx 1 root       root           2 Jun 18 16:50 f3 -> f1
+-rwxr-xr-x 1 root       root       14704 Jun 17 20:55 kdum.sh
+drwx------ 5 lighthouse lighthouse  4096 May 18 10:10 lighthouse
+drwxr-xr-x 2 root       root        4096 Jun 17 20:56 test1
+[root@VM-4-9-centos home]# rm  f1							#删除f1
+rm: remove regular file ‘f1’? y
+[root@VM-4-9-centos home]# ls
+f2  f3  kdum.sh  lighthouse  test1
+[root@VM-4-9-centos home]# cat f2							#f2正常访问
+hello world
+[root@VM-4-9-centos home]# cat f1							#f3由于f1已经删除而访问失败
+cat: f1: No such file or directory
+```
+
+
 
 
 
@@ -335,3 +532,339 @@ kdump-lib.sh  lighthouse  test1
 kdum.sh  lighthouse  test1
 ```
 
+
+
+
+
+
+
+## 文件内容查看
+
+Linux系统中使用以下命令来查看文件的内容：
+
+- cat 由第一行开始显示文件内容
+- tac 从最后一行开始显示，可以看出 tac 是 cat 的倒着写！
+- nl  显示的时候，顺道输出行号！
+- more 一页一页的显示文件内容 
+- less 与 more 类似，但是比 more 更好的是，他可以往前翻页！
+- head 只看头几行 (-n命令显示头部 n行)
+- tail 只看尾巴几行
+
+[注意]
+
+​	`q` :退出 `空格`:代表下翻页  `回车`: 下一行 `f`显示行号  
+
+​	向上查找 : `/`[目标字符串] 向下查找: `?`[目标字符串] 
+
+​	查找时,`n`:下一个 `N`: 上一个
+
+```shell
+#命令测试
+[root@VM-4-9-centos /]# cd /etc/sysconfig/network-scripts/
+[root@VM-4-9-centos network-scripts]# cat ifcfg-eth0  					#从第一行开始显示
+# Created by cloud-init on instance boot automatically, do not edit.
+#
+BOOTPROTO=dhcp
+DEVICE=eth0
+HWADDR=52:54:00:27:a8:37
+ONBOOT=yes
+PERSISTENT_DHCLIENT=yes
+TYPE=Ethernet
+USERCTL=no
+[root@VM-4-9-centos network-scripts]# tac ifcfg-eth0 					#从末尾反向开始显示
+USERCTL=no
+TYPE=Ethernet
+PERSISTENT_DHCLIENT=yes
+ONBOOT=yes
+HWADDR=52:54:00:27:a8:37
+DEVICE=eth0
+BOOTPROTO=dhcp
+#
+# Created by cloud-init on instance boot automatically, do not edit.
+[root@VM-4-9-centos network-scripts]# nl ifcfg-eth0 					#加行号开始显示
+     1	# Created by cloud-init on instance boot automatically, do not edit.
+     2	#
+     3	BOOTPROTO=dhcp
+     4	DEVICE=eth0
+     5	HWADDR=52:54:00:27:a8:37
+     6	ONBOOT=yes
+     7	PERSISTENT_DHCLIENT=yes
+     8	TYPE=Ethernet
+     9	USERCTL=no
+[root@VM-4-9-centos network-scripts]# head -n 5 ifcfg-eth0 
+# Created by cloud-init on instance boot automatically, do not edit.
+#
+BOOTPROTO=dhcp
+DEVICE=eth0
+HWADDR=52:54:00:27:a8:37
+```
+
+
+
+
+
+
+
+# 文件权限和属性
+
+​	Linux 系统是一种典型的多用户系统，不同的用户处于不同的地位，拥有不同的权限。为了保护系统的安全性，Linux 系统对不同的用户访问同一文件（包括目录文件）的权限做了不同的规定。在 Linux 中我们通常使用以下两个命令来修改文件或目录的所属用户与权限：
+
+- chown (change ownerp) ： 修改所属用户与组。
+- chmod (change mode) ： 修改用户的权限。
+
+​	我们以`/`目录下的目录为例，查看他们的权限和属性。
+
+```shell
+[root@VM-4-9-centos /]# ls -al
+total 80
+dr-xr-xr-x.  19 root root  4096 Jun 18 11:08 .
+dr-xr-xr-x.  19 root root  4096 Jun 18 11:08 ..
+lrwxrwxrwx.   1 root root     7 Mar  7  2019 bin -> usr/bin
+dr-xr-xr-x.   5 root root  4096 May 17 10:32 boot
+drwxr-xr-x    2 root root  4096 Nov  5  2019 data
+drwxr-xr-x   20 root root  3040 Jun 17 11:27 dev
+drwxr-xr-x.  96 root root 12288 Jun 17 11:27 etc
+drwxr-xr-x.   4 root root  4096 Jun 17 20:57 home
+lrwxrwxrwx.   1 root root     7 Mar  7  2019 lib -> usr/lib
+lrwxrwxrwx.   1 root root     9 Mar  7  2019 lib64 -> usr/lib64
+drwx------.   2 root root 16384 Mar  7  2019 lost+found
+drwxr-xr-x.   2 root root  4096 Apr 11  2018 media
+drwxr-xr-x.   2 root root  4096 Apr 11  2018 mnt
+drwxr-xr-x.   5 root root  4096 Jan  8 18:18 opt
+dr-xr-xr-x  102 root root     0 Jun 17 11:26 proc
+dr-xr-x---.   6 root root  4096 May 17 10:31 root
+drwxr-xr-x   24 root root   880 Jun 17 11:28 run
+lrwxrwxrwx.   1 root root     8 Mar  7  2019 sbin -> usr/sbin
+drwxr-xr-x.   2 root root  4096 Apr 11  2018 srv
+dr-xr-xr-x   13 root root     0 Jun 17 17:11 sys
+drwxrwxrwt.   8 root root  4096 Jun 18 10:54 tmp
+drwxr-xr-x.  14 root root  4096 Jan  8 18:19 usr
+drwxr-xr-x.  20 root root  4096 Jan  8 18:19 var
+```
+
+```shell
+[文件类型和权限][硬链接个数][创建者名][所属组名][大小][上一次修改时间][文件名]
+```
+
+![img](asset/Linux.assets/file-llls22.jpg)
+
+## 文件属性
+
+```shell
+lrwxrwxrwx.   1 root root     7 Mar  7  2019 bin -> usr/bin
+dr-xr-xr-x.   5 root root  4096 May 17 10:32 boot
+```
+
+在 Linux 中第一个字符代表这个文件是目录、文件或链接文件等等。
+
+- ==当为 **d** 则是目录==
+- ==当为 **-** 则是文件；==
+- ==若是 **l** 则表示为链接文档(link file)；==
+- 若是 **b** 则表示为装置文件里面的可供储存的接口设备(可随机存取装置)；
+- 若是 **c** 则表示为装置文件里面的串行端口设备，例如键盘、鼠标(一次性读取装置)。
+
+​	
+
+## 文件权限
+
+	lrwxrwxrwx.   1 root root     7 Mar  7  2019 bin -> usr/bin
+	dr-xr-xr-x.   5 root root  4096 May 17 10:32 boot
+
+​	接下来的字符中，以三个为一组，且均为 **rwx** 的三个参数的组合。其中， **r** 代表可读(read)、 **w** 代表可写(write)、 **x** 代表可执行(execute)。 要注意的是，这三个权限的位置不会改变，如果没有权限，就会出现减号 **-** 而已。每个文件的属性由左边第一部分的 10 个字符来确定（如下图）。
+
+![363003_1227493859FdXT](asset/Linux.assets/363003_1227493859FdXT.png)
+
+​	在Linux系统中，用户是按组分类的，一个用户属于一个或多个组。文件所有者以外的用户又可以分为文件所有者的同组用户和其他用户。因此，Linux系统按文件所有者、文件所有者同组用户和其他用户来规定了不同的文件访问权限。
+
+
+
+## 文件权限修改
+
+​	Linux文件属性有两种设置方法，一种是数字，一种是符号。
+
+
+
+==chmod更改文件9个属性==
+
+```bash
+ chmod [-R] xyz 文件或目录
+```
+
+选项与参数：
+
+- xyz : 就是数字类型的权限属性，为 rwx 属性数值的相加。
+- -R : 进行递归(recursive)的持续变更，亦即连同次目录下的所有文件都会变更
+
+​	Linux 文件的基本权限就有九个，分别是 **owner/group/others(拥有者/组/其他)** 三种身份各有自己的 **read/write/execute** 权限。
+
+先复习一下刚刚上面提到的数据：文件的权限字符为： **-rwxrwxrwx** ， 这九个权限是三个三个一组的！其中，我们可以使用数字来代表各个权限，各权限的分数对照如下：
+
+```shell
+ r:4   w:2   x:1
+```
+
+每种身份(owner/group/others)各自的三个权限(r/w/x)分数是需要累加的，例如当权限为： **-rwxrwx---** 分数则是：
+
+- owner = rwx = 4+2+1 = 7
+- group = rwx = 4+2+1 = 7
+- others= --- = 0+0+0 = 0
+
+所以等我们设定权限的变更时，该文件的权限数字就是 **770**。
+
+```shell
+-rwxr-xr-x   1 root       root       14704 Jun 17 20:55 kdum.sh
+[root@VM-4-9-centos home]# chmod 777 kdum.sh
+-rwxrwxrwx   1 root       root       14704 Jun 17 20:55 kdum.sh
+[root@VM-4-9-centos home]# chmod 755 kdum.sh 
+-rwxr-xr-x   1 root       root       14704 Jun 17 20:55 kdum.sh
+```
+
+
+
+chgrp：更改文件属组
+
+```
+chgrp [-R] 属组名 文件名
+```
+
+参数选项
+
+- -R：递归更改文件属组，就是在更改某个目录文件的属组时，如果加上-R的参数，那么该目录下的所有文件的属组都会更改。
+
+
+
+chown：更改文件属主，也可以同时更改文件属组
+
+语法：
+
+```
+chown [–R] 属主名 文件名
+chown [-R] 属主名：属组名 文件名
+```
+
+
+
+
+
+# Vim编辑器
+
+​	*所有的 Unix Like 系统都会内建 vi 文书编辑器，其他的文书编辑器则不一定会存在。但是目前我们使用比较多的是 vim 编辑器。vim 具有程序编辑的能力，可以主动的以字体颜色辨别语法的正确性，方便程序设计。*
+
+## vi/vim 的使用
+
+​	基本上 vi/vim 共分为三种模式，分别是**命令模式（Command mode）**，**输入模式（Insert mode）**和**底线命令模式（Last line mode）**。 这三种模式的作用分别是：
+
+<img src="asset/Linux.assets/vim-vi-workmodel.png" alt="img" style="zoom:67%;" />
+
+## 命令模式
+
+用户刚刚启动 vi/vim，便进入了命令模式。
+
+此状态下敲击键盘动作会被Vim识别为命令，而非输入字符。比如我们此时按下i，并不会输入一个字符，i被当作了一个命令。
+
+以下是常用的几个命令：
+
+- **i** 切换到输入模式，以输入字符。
+- **x** 删除当前光标所在处的字符。
+- **:** 切换到底线命令模式，以在最底一行输入命令。
+
+若想要编辑文本：启动Vim，进入了命令模式，按下i，切换到输入模式。
+
+命令模式只有一些最基本的命令，因此仍要依靠底线命令模式输入更多命令。
+
+## 输入模式
+
+在命令模式下按下i就进入了输入模式。
+
+在输入模式中，可以使用以下按键：
+
+- **字符按键以及Shift组合**，输入字符
+- **ENTER**，回车键，换行
+- **BACK SPACE**，退格键，删除光标前一个字符
+- **DEL**，删除键，删除光标后一个字符
+- **方向键**，在文本中移动光标
+- **HOME**/**END**，移动光标到行首/行尾
+- **Page Up**/**Page Down**，上/下翻页
+- **Insert**，切换光标为输入/替换模式，光标将变成竖线/下划线
+- **ESC**，退出输入模式，切换到命令模式
+
+## 底线命令模式
+
+在命令模式下按下:（英文冒号）就进入了底线命令模式。底线命令模式可以输入单个或多个字符的命令，可用的命令非常多。在底线命令模式中，基本的命令有（已经省略了冒号）：
+
+- q 退出程序
+- w 保存文件
+
+按ESC键可随时退出底线命令模式。
+
+```shell
+:wq
+```
+
+## 常用操作
+
+| 功能键           | 作用                                                         |
+| ---------------- | ------------------------------------------------------------ |
+| [Ctrl] + [f]     | 屏幕『向下』移动一页，相当于 [Page Down]按键 (常用)          |
+| [Ctrl] + [b]     | 屏幕『向上』移动一页，相当于 [Page Up] 按键 (常用)           |
+| 0 或功能键[Home] | 这是数字『 0 』：移动到这一行的最前面字符处 (常用)           |
+| $ 或功能键[End]  | 移动到这一行的最后面字符处(常用)                             |
+| gg               | 移动到这个档案的第一行，相当于 1G 啊！ (常用)                |
+| n<Enter>         | n 为数字。光标向下移动 n 行(常用)                            |
+| /word            | 向光标之下寻找一个名称为 word 的字符串。例如要在档案内搜寻 vbird 这个字符串，就输入 /vbird 即可！ (常用) |
+| ?word            | 向光标之上寻找一个字符串名称为 word 的字符串。               |
+| n                | 这个 n 是英文按键。代表重复前一个搜寻的动作。举例来说， 如果刚刚我们执行 /vbird 去向下搜寻 vbird 这个字符串，则按下 n 后，会向下继续搜寻下一个名称为 vbird 的字符串。如果是执行 ?vbird 的话，那么按下 n 则会向上继续搜寻名称为 vbird 的字符串！ |
+| N                | 这个 N 是英文按键。与 n 刚好相反，为『反向』进行前一个搜寻动作。 例如 /vbird 后，按下 N 则表示『向上』搜寻 vbird 。 |
+| x, X             | 在一行字当中，x 为向后删除一个字符 (相当于 [del] 按键)， X 为向前删除一个字符(相当于 [backspace] 亦即是退格键) (常用) |
+| dd               | 删除游标所在的那一整行(常用)                                 |
+| ndd              | n 为数字。删除光标所在的向下 n 行，例如 20dd 则是删除 20 行 (常用) |
+| yy               | 复制游标所在的那一行(常用)                                   |
+| u                | 复原前一个动作。(常用)                                       |
+| [Ctrl]+r         | 重做上一个动作。(常用)                                       |
+| .                | 不要怀疑！这就是小数点！意思是重复前一个动作的意思。 如果你想要重复删除、重复贴上等等动作，按下小数点『.』就好了！ (常用) |
+| :wq              | 储存后离开，若为 :wq! 则为强制储存后离开 (常用)              |
+
+
+
+
+
+# 用户和用户组管理
+
+​	Linux系统是一个多用户多任务的分时操作系统，任何一个要使用系统资源的用户，都必须首先向系统管理员申请一个账号，然后以这个账号的身份进入系统。
+
+​	用户的账号一方面可以帮助系统管理员对使用系统的用户进行跟踪，并控制他们对系统资源的访问；另一方面也可以帮助用户组织文件，并为用户提供安全性保护。
+
+​	每个用户账号都拥有一个唯一的用户名和各自的口令。
+
+​	用户在登录时键入正确的用户名和口令后，就能够进入系统和自己的主目录。
+
+实现用户账号的管理，要完成的工作主要有如下几个方面：
+
+- 用户账号的添加、删除与修改。
+- 用户口令的管理。
+- 用户组的管理。
+
+## 用户账号的管理
+
+
+
+==useradd添加新的用户==
+
+```bash
+useradd [选项] [用户名]
+```
+
+参数说明：
+
+- 选项:
+
+  - -c comment 指定一段注释性描述。
+  - -d 目录 指定用户主目录，如果此目录不存在，则同时使用-m选项，可以创建主目录。
+  - -g 用户组 指定用户所属的用户组。
+  - -G 用户组，用户组 指定用户所属的附加组。
+  - -s Shell文件 指定用户的登录Shell。
+  - -u 用户号 指定用户的用户号，如果同时有-o选项，则可以重复使用其他用户的标识号。
+
+- 用户名:
+
+  指定新账号的登录名。
