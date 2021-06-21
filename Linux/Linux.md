@@ -850,6 +850,8 @@ chown [-R] 属主名：属组名 文件名
 
 ==useradd添加新的用户==
 
+使用root用户添加，其他用户初始没有权限。
+
 ```bash
 useradd [选项] [用户名]
 ```
@@ -859,7 +861,7 @@ useradd [选项] [用户名]
 - 选项:
 
   - -c comment 指定一段注释性描述。
-  - -d 目录 指定用户主目录，如果此目录不存在，则同时使用-m选项，可以创建主目录。
+  - -d 目录 指定用户主目录，如果此目录不存在，则同时使用`-m`选项，可以创建主目录。
   - -g 用户组 指定用户所属的用户组。
   - -G 用户组，用户组 指定用户所属的附加组。
   - -s Shell文件 指定用户的登录Shell。
@@ -868,3 +870,779 @@ useradd [选项] [用户名]
 - 用户名:
 
   指定新账号的登录名。
+
+\[本质]:这个命令在 `/etc/passwd` 中添加了一个用户的信息，同时更新其他系统文件如`/etc/shadow`, `/etc/group`等。
+
+```shell
+[root@VM-4-9-centos /]# adduser -m zhangfan 
+[root@VM-4-9-centos /]# cd home/
+[root@VM-4-9-centos home]# ls
+lighthouse  test1  zhangfan  
+```
+
+
+
+==userdel删除帐号==
+
+```bash
+userdel [选项] [用户名]
+```
+
+常用的选项是 **-r**，它的作用是把用户的主目录一起删除。
+
+```shell
+[root@VM-4-9-centos etc]# userdel -r zhangfan
+[root@VM-4-9-centos etc]# cd /home
+[root@VM-4-9-centos home]# ls
+lighthouse  test1 
+```
+
+
+
+==usermod修改帐号==
+
+```
+usermod [选项] [用户名]
+```
+
+常用的选项包括`-c, -d, -m, -g, -G, -s, -u以及-o等`，这些选项的意义与`useradd`命令中的选项一样，可以为用户指定新的资源值。
+
+另外，有些系统可以使用选项：-l 新用户名
+
+这个选项指定一个新的账号，即将原来的用户名改为新的用户名。
+
+```shell
+[root@VM-4-9-centos home]# usermod -d /home/zhang zhangfan
+usermod: user 'zhangfan' does not exist
+[root@VM-4-9-centos home]# useradd -m  zhangfan
+[root@VM-4-9-centos home]# usermod -d /home/zhang zhangfan
+[root@VM-4-9-centos home]# ls
+kdum.sh  lighthouse  test1  zhangfan  zhang.txt
+[root@VM-4-9-centos home]# cat /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+...
+zhangfan:x:1001:1001::/home/zhang:/bin/bash
+```
+
+
+
+==su切换用户==
+
+```shell
+[root@F4N ~]# su zhangfan
+[zhangfan@F4N root]$ 
+```
+
+
+
+==passwd密码管理==
+
+```shell
+passwd 选项 用户名
+```
+
+可使用的选项：
+
+- -l 锁定口令，即禁用账号。
+- -u 口令解锁。
+- -d 使账号无口令。
+- -f 强迫用户下次登录时修改口令。
+
+如果默认用户名，则修改当前用户的口令。
+
+
+
+如果是超级用户，可以用下列形式指定任何用户的口令：
+
+```
+# passwd [username] 
+New password:******* 
+Re-enter new password:*******
+```
+
+假设当前用户是普通，则下面的命令修改该用户自己的口令：
+
+```
+$ passwd 
+Old password:****** 
+New password:******* 
+Re-enter new password:*******
+```
+
+
+
+锁定用户
+
+```shell
+[root@F4N home]# passwd -l zhangfan  	#冻结账户
+Locking password for user zhangfan.
+passwd: Success
+```
+
+```shell
+[root@F4N home]# passwd -d zhangfan 	#删除密码而达到锁定目的
+Removing password for user zhangfan.
+passwd: Success
+```
+
+
+
+## 用户组
+
+​	每个用户都有一个用户组，系统可以对一个用户组中的所有用户进行集中管理。不同Linux 系统对用户组的规定有所不同，如Linux下的用户属于与它同名的用户组，这个用户组在创建用户时同时创建。用户组的管理涉及用户组的添加、删除和修改。
+
+​	组的增加、删除和修改实际上就是对`/etc/group`文件的更新。
+
+
+
+==groupadd创建用户组==
+
+```shell
+groupadd 选项 用户组
+```
+
+可以使用的选项有：
+
+- -g GID 指定新用户组的组标识号（GID）。
+- -o 一般与-g选项同时使用，表示新用户组的GID可以与系统已有用户组的GID相同。
+
+```shell
+[root@F4N home]# groupadd zhangfan
+[root@F4N home]# cat /etc/group
+root:x:0:
+...
+zhangfan:x:1001: #新组的组标识号是在当前已有的最大组标识号的基础上加1。
+[root@F4N home]# groupadd -g 250 zhangfan2
+[root@F4N home]# cat /etc/group
+root:x:0:
+...
+zhangfan:x:1001:
+zhangfan2:x:250:
+```
+
+
+
+==groupmod修改用户组==
+
+```
+groupmod 选项 用户组
+```
+
+常用的选项有：
+
+- -g GID 为用户组指定新的组标识号。
+- -o 与-g选项同时使用，用户组的新GID可以与系统已有用户组的GID相同。
+- -n新用户组 将用户组的名字改为新名字
+
+```shell
+# groupmod –g 10000 -n group3 group2
+此命令将组group2的标识号改为10000，组名修改为group3。
+```
+
+
+
+==groupdel删除组==
+
+```
+groupdel 用户组
+```
+
+
+
+## 用户账号有关的系统文件
+
+完成用户管理的工作有许多种方法，但是每一种方法实际上都是对有关的系统文件进行修改。
+
+与用户和用户组相关的信息都存放在一些系统文件中，这些文件包括/etc/passwd, /etc/shadow, /etc/group等。
+
+下面分别介绍这些文件的内容。
+
+### 1、/etc/passwd文件是用户管理工作涉及的最重要的一个文件。
+
+Linux系统中的每个用户都在/etc/passwd文件中有一个对应的记录行，它记录了这个用户的一些基本属性。
+
+这个文件对所有用户都是可读的。它的内容类似下面的例子：
+
+```
+＃ cat /etc/passwd
+
+root:x:0:0:Superuser:/:
+daemon:x:1:1:System daemons:/etc:
+bin:x:2:2:Owner of system commands:/bin:
+sys:x:3:3:Owner of system files:/usr/sys:
+adm:x:4:4:System accounting:/usr/adm:
+uucp:x:5:5:UUCP administrator:/usr/lib/uucp:
+auth:x:7:21:Authentication administrator:/tcb/files/auth:
+cron:x:9:16:Cron daemon:/usr/spool/cron:
+listen:x:37:4:Network daemon:/usr/net/nls:
+lp:x:71:18:Printer administrator:/usr/spool/lp:
+sam:x:200:50:Sam san:/home/sam:/bin/sh
+```
+
+从上面的例子我们可以看到，/etc/passwd中一行记录对应着一个用户，每行记录又被冒号(:)分隔为7个字段，其格式和具体含义如下：
+
+```shell
+用户名:口令:用户标识号:组标识号:注释性描述:主目录:登录Shell
+```
+
+1）"用户名"是代表用户账号的字符串。
+
+通常长度不超过8个字符，并且由大小写字母和/或数字组成。登录名中不能有冒号(:)，因为冒号在这里是分隔符。
+
+为了兼容起见，登录名中最好不要包含点字符(.)，并且不使用连字符(-)和加号(+)打头。
+
+2）“口令”一些系统中，存放着加密后的用户口令字。
+
+虽然这个字段存放的只是用户口令的加密串，不是明文，但是由于/etc/passwd文件对所有用户都可读，所以这仍是一个安全隐患。因此，现在许多Linux 系统（如SVR4）都使用了shadow技术，把真正的加密后的用户口令字存放到/etc/shadow文件中，而在/etc/passwd文件的口令字段中只存放一个特殊的字符，例如“x”或者“*”。
+
+3）“用户标识号”是一个整数，系统内部用它来标识用户。
+
+一般情况下它与用户名是一一对应的。如果几个用户名对应的用户标识号是一样的，系统内部将把它们视为同一个用户，但是它们可以有不同的口令、不同的主目录以及不同的登录Shell等。
+
+通常用户标识号的取值范围是0～65 535。0是超级用户root的标识号，1～99由系统保留，作为管理账号，普通用户的标识号从100开始。在Linux系统中，这个界限是500。
+
+4）“组标识号”字段记录的是用户所属的用户组。
+
+它对应着/etc/group文件中的一条记录。
+
+5)“注释性描述”字段记录着用户的一些个人情况。
+
+例如用户的真实姓名、电话、地址等，这个字段并没有什么实际的用途。在不同的Linux 系统中，这个字段的格式并没有统一。在许多Linux系统中，这个字段存放的是一段任意的注释性描述文字，用做finger命令的输出。
+
+6)“主目录”，也就是用户的起始工作目录。
+
+它是用户在登录到系统之后所处的目录。在大多数系统中，各用户的主目录都被组织在同一个特定的目录下，而用户主目录的名称就是该用户的登录名。各用户对自己的主目录有读、写、执行（搜索）权限，其他用户对此目录的访问权限则根据具体情况设置。
+
+7)用户登录后，要启动一个进程，负责将用户的操作传给内核，这个进程是用户登录到系统后运行的命令解释器或某个特定的程序，即Shell。
+
+Shell是用户与Linux系统之间的接口。Linux的Shell有许多种，每种都有不同的特点。常用的有sh(Bourne Shell), csh(C Shell), ksh(Korn Shell), tcsh(TENEX/TOPS-20 type C Shell), bash(Bourne Again Shell)等。
+
+系统管理员可以根据系统情况和用户习惯为用户指定某个Shell。如果不指定Shell，那么系统使用sh为默认的登录Shell，即这个字段的值为/bin/sh。
+
+用户的登录Shell也可以指定为某个特定的程序（此程序不是一个命令解释器）。
+
+利用这一特点，我们可以限制用户只能运行指定的应用程序，在该应用程序运行结束后，用户就自动退出了系统。有些Linux 系统要求只有那些在系统中登记了的程序才能出现在这个字段中。
+
+8)系统中有一类用户称为伪用户（pseudo users）。
+
+这些用户在/etc/passwd文件中也占有一条记录，但是不能登录，因为它们的登录Shell为空。它们的存在主要是方便系统管理，满足相应的系统进程对文件属主的要求。
+
+常见的伪用户如下所示：
+
+```
+伪 用 户 含 义 
+bin 拥有可执行的用户命令文件 
+sys 拥有系统文件 
+adm 拥有帐户文件 
+uucp UUCP使用 
+lp lp或lpd子系统使用 
+nobody NFS使用
+```
+
+------
+
+
+
+### 2、拥有帐户文件
+
+**1、除了上面列出的伪用户外，还有许多标准的伪用户，例如：audit, cron, mail, usenet等，它们也都各自为相关的进程和文件所需要。**
+
+由于/etc/passwd文件是所有用户都可读的，如果用户的密码太简单或规律比较明显的话，一台普通的计算机就能够很容易地将它破解，因此对安全性要求较高的Linux系统都把加密后的口令字分离出来，单独存放在一个文件中，这个文件是/etc/shadow文件。 有超级用户才拥有该文件读权限，这就保证了用户密码的安全性。
+
+**2、/etc/shadow中的记录行与/etc/passwd中的一一对应，它由pwconv命令根据/etc/passwd中的数据自动产生**
+
+它的文件格式与/etc/passwd类似，由若干个字段组成，字段之间用":"隔开。这些字段是：
+
+```
+登录名:加密口令:最后一次修改时间:最小时间间隔:最大时间间隔:警告时间:不活动时间:失效时间:标志
+```
+
+1. "登录名"是与/etc/passwd文件中的登录名相一致的用户账号
+2. "口令"字段存放的是加密后的用户口令字，长度为13个字符。如果为空，则对应用户没有口令，登录时不需要口令；如果含有不属于集合 { ./0-9A-Za-z }中的字符，则对应的用户不能登录。
+3. "最后一次修改时间"表示的是从某个时刻起，到用户最后一次修改口令时的天数。时间起点对不同的系统可能不一样。例如在SCO Linux 中，这个时间起点是1970年1月1日。
+4. "最小时间间隔"指的是两次修改口令之间所需的最小天数。
+5. "最大时间间隔"指的是口令保持有效的最大天数。
+6. "警告时间"字段表示的是从系统开始警告用户到用户密码正式失效之间的天数。
+7. "不活动时间"表示的是用户没有登录活动但账号仍能保持有效的最大天数。
+8. "失效时间"字段给出的是一个绝对的天数，如果使用了这个字段，那么就给出相应账号的生存期。期满后，该账号就不再是一个合法的账号，也就不能再用来登录了。
+
+下面是/etc/shadow的一个例子：
+
+```
+＃ cat /etc/shadow
+
+root:Dnakfw28zf38w:8764:0:168:7:::
+daemon:*::0:0::::
+bin:*::0:0::::
+sys:*::0:0::::
+adm:*::0:0::::
+uucp:*::0:0::::
+nuucp:*::0:0::::
+auth:*::0:0::::
+cron:*::0:0::::
+listen:*::0:0::::
+lp:*::0:0::::
+sam:EkdiSECLWPdSa:9740:0:0::::
+```
+
+### 3、用户组的所有信息都存放在/etc/group文件中。
+
+将用户分组是Linux 系统中对用户进行管理及控制访问权限的一种手段。
+
+每个用户都属于某个用户组；一个组中可以有多个用户，一个用户也可以属于不同的组。
+
+当一个用户同时是多个组中的成员时，在/etc/passwd文件中记录的是用户所属的主组，也就是登录时所属的默认组，而其他组称为附加组。
+
+用户要访问属于附加组的文件时，必须首先使用newgrp命令使自己成为所要访问的组中的成员。
+
+用户组的所有信息都存放在/etc/group文件中。此文件的格式也类似于/etc/passwd文件，由冒号(:)隔开若干个字段，这些字段有：
+
+```
+组名:口令:组标识号:组内用户列表
+```
+
+1. "组名"是用户组的名称，由字母或数字构成。与/etc/passwd中的登录名一样，组名不应重复。
+2. "口令"字段存放的是用户组加密后的口令字。一般Linux 系统的用户组都没有口令，即这个字段一般为空，或者是*。
+3. "组标识号"与用户标识号类似，也是一个整数，被系统内部用来标识组。
+4. "组内用户列表"是属于这个组的所有用户的列表/b]，不同用户之间用逗号(,)分隔。这个用户组可能是用户的主组，也可能是附加组。
+
+/etc/group文件的一个例子如下：
+
+```
+root::0:root
+bin::2:root,bin
+sys::3:root,uucp
+adm::4:root,adm
+daemon::5:root,daemon
+lp::7:root,lp
+users::20:root,sam
+```
+
+
+
+
+
+# 磁盘管理
+
+Linux磁盘管理好坏直接关系到整个系统的性能问题。
+
+Linux磁盘管理常用三个命令为df、du和fdisk。
+
+- df：列出文件系统的整体磁盘使用量
+- du：检查磁盘空间使用量
+- fdisk：用于磁盘分区
+
+
+
+## df 检查文件系统的磁盘空间占用情况
+
+df命令参数功能：检查文件系统的磁盘空间占用情况。可以利用该命令来获取硬盘被占用了多少空间，目前还剩下多少空间等信息。
+
+语法：
+
+```
+df [-ahikHTm] [目录或文件名]
+```
+
+选项与参数：
+
+- -a ：列出所有的文件系统，包括系统特有的 /proc 等文件系统；
+- -k ：以 KBytes 的容量显示各文件系统；
+- -m ：以 MBytes 的容量显示各文件系统；
+- -h ：以人们较易阅读的 GBytes, MBytes, KBytes 等格式自行显示；
+- -H ：以 M=1000K 取代 M=1024K 的进位方式；
+- -T ：显示文件系统类型, 连同该 partition 的 filesystem 名称 (例如 ext3) 也列出；
+- -i ：不用硬盘容量，而以 inode 的数量来显示
+
+```shell
+[root@F4N home]# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+devtmpfs        908M     0  908M   0% /dev
+tmpfs           919M   24K  919M   1% /dev/shm
+tmpfs           919M  556K  919M   1% /run
+tmpfs           919M     0  919M   0% /sys/fs/cgroup
+/dev/vda1        59G  3.8G   53G   7% /
+tmpfs           184M     0  184M   0% /run/user/0
+```
+
+
+
+## du 对文件和目录磁盘使用的空间的查看
+
+Linux du命令也是查看使用空间的，但是与df命令不同的是Linux du命令是对文件和目录磁盘使用的空间的查看，还是和df命令有一些区别的，这里介绍Linux du命令。
+
+语法：
+
+```
+du [-ahskm] 文件或目录名称
+```
+
+选项与参数：
+
+- -a ：列出所有的文件与目录容量，因为默认仅统计目录底下的文件量而已。
+- -h ：以人们较易读的容量格式 (G/M) 显示；
+- -s ：列出总量而已，而不列出每个各别的目录占用容量；
+- -S ：不包括子目录下的总计，与 -s 有点差别。
+- -k ：以 KBytes 列出容量显示；
+- -m ：以 MBytes 列出容量显示；
+
+
+
+```shell
+[root@F4N home]# du -sm /*    #查看占用最多的文件夹
+0	/bin
+123	/boot
+1	/data
+0	/dev
+37	/etc
+...
+1	/srv
+0	/sys
+1	/tmp
+2791	/usr
+761	/var
+```
+
+## fdisk 磁盘分区表
+
+fdisk 是 Linux 的磁盘分区表操作工具。
+
+语法：
+
+```
+fdisk [-l] 装置名称
+```
+
+选项与参数：
+
+- -l ：输出后面接的装置所有的分区内容。若仅有 fdisk -l 时， 则系统将会把整个系统内能够搜寻到的装置的分区均列出来。
+
+```shell
+[root@F4N mnt]# fdisk -l
+
+Disk /dev/vda: 64.4 GB, 64424509440 bytes, 125829120 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk label type: dos
+Disk identifier: 0x0009ac89
+
+   Device Boot      Start         End      Blocks   Id  System
+/dev/vda1   *        2048   125829086    62913519+  83  Linux
+```
+
+
+
+
+
+## 磁盘挂载与卸除
+
+Linux 的磁盘挂载使用 `mount` 命令，卸载使用 `umount` 命令。
+
+磁盘挂载语法：
+
+```
+mount [-t 文件系统] [-L Label名] [-o 额外选项] [-n]  装置文件名  挂载点
+```
+
+用默认的方式，将刚刚创建的 /dev/hdc6 挂载到 /mnt/hdc6 上面！
+
+```
+[root@www ~]# mkdir /mnt/hdc6
+[root@www ~]# mount /dev/hdc6 /mnt/hdc6
+[root@www ~]# df
+Filesystem           1K-blocks      Used Available Use% Mounted on
+.....中间省略.....
+/dev/hdc6              1976312     42072   1833836   3% /mnt/hdc6
+```
+
+磁盘卸载命令 `umount` 语法：
+
+```
+umount [-fn] 装置文件名或挂载点
+```
+
+选项与参数：
+
+- -f ：强制卸除！可用在类似网络文件系统 (NFS) 无法读取到的情况下；
+- -n ：不升级 /etc/mtab 情况下卸除。
+
+卸载/dev/hdc6
+
+```
+[root@www ~]# umount /dev/hdc6     
+```
+
+
+
+
+
+# 进程管理
+
+==ps查看进程信息==
+
+Linux ps （英文全拼：process status）命令用于显示当前进程的状态，类似于 windows 的任务管理器。
+
+```shell
+ps [options] [--help]
+```
+
+参数：
+
+- -A 列出所有的进程
+
+- -a 列出当前运行的进程
+
+- -w 显示加宽可以显示较多的资讯
+
+- -au 显示较详细的资讯
+
+- -aux 显示所有包含其他使用者的行程
+
+- au(x) 输出格式 :
+
+  ```
+  USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND
+  ```
+
+  - USER: 行程拥有者
+  - PID: pid
+  - %CPU: 占用的 CPU 使用率
+  - %MEM: 占用的记忆体使用率
+  - VSZ: 占用的虚拟记忆体大小
+  - RSS: 占用的记忆体大小
+  - TTY: 终端的次要装置号码 (minor device number of tty)
+  - STAT: 该行程的状态:
+    - D: 无法中断的休眠状态 (通常 IO 的进程)
+    - R: 正在执行中
+    - S: 静止状态
+    - T: 暂停执行
+    - Z: 不存在但暂时无法消除
+    - W: 没有足够的记忆体分页可分配
+    - <: 高优先序的行程
+    - N: 低优先序的行程
+    - L: 有记忆体分页分配并锁在记忆体内 (实时系统或捱A I/O)
+  - START: 行程开始时间
+  - TIME: 执行的时间
+  - COMMAND:所执行的指令
+
+```shell
+[root@F4N /]# ps -au
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root      1334  0.0  0.0 110208   868 ttyS0    Ss+  Jun17   0:00 /sbin/agetty --keep-baud 115200,38400,9600 ttyS0
+root      1335  0.0  0.0 110208   856 tty1     Ss+  Jun17   0:00 /sbin/agetty --noclear tty1 linux
+root     19471  0.0  0.1 116420  3044 pts/0    Ss   15:11   0:00 -bash
+root     30682  0.0  0.0 155452  1868 pts/0    R+   16:19   0:00 ps -au
+```
+
+```shell
+[root@F4N /]# ps -aux|grep mysql
+root     31007  0.0  0.0 112812   972 pts/0    R+   16:21   0:00 grep --color=auto mysql
+# | 在linux中成为管道符 A|B
+#grep进行过滤,筛选符合条件的字符串
+```
+
+
+
+==pstree进程树状图==
+
+Linux pstree命令将所有行程以树状图显示，树状图将会以 pid (如果有指定) 或是以 init 这个基本行程为根 (root)，如果有指定使用者 id，则树状图会只显示该使用者所拥有的行程。
+
+```
+pstree [-a] [-c] [-h|-Hpid] [-l] [-n] [-p] [-u] [-G|-U] [pid|user]
+```
+
+常用:
+
+- -p 显示父id
+- -u 显示用户组
+
+```shell
+[root@F4N /]# pstree -pu
+systemd(1)─┬─YDLive(1698)─┬─{YDLive}(1699)
+           │              ├─{YDLive}(1700)
+...
+           ├─rshim(1045)───{rshim}(1065)
+           ├─rsyslogd(1262)─┬─{rsyslogd}(1280)
+           │                └─{rsyslogd}(1313)
+           ├─sgagent(1819)───{sgagent}(1820)
+           ├─sshd(1556)─┬─sshd(19464)───bash(19471)───pstree(32457)
+           │            └─sshd(19489)───sftp-server(19506)
+           ├─systemd-journal(365)
+           ├─systemd-logind(563)
+           ├─systemd-udevd(397)
+           ├─tat_agent(1275)─┬─{tat_agent}(1281)
+           │                 ├─{tat_agent}(1320)
+           │                 ├─{tat_agent}(1321)
+           │                 └─{tat_agent}(1325)
+           └─tuned(1040)─┬─{tuned}(1367)
+                         ├─{tuned}(1368)
+                         ├─{tuned}(1386)
+                         └─{tuned}(1392)
+```
+
+
+
+==kill结束进程==
+
+```shell
+kill [-s <信息名称或编号>][程序]　或　kill [-l <信息编号>]
+```
+
+**参数说明**：
+
+- -l <信息编号> 　若不加<信息编号>选项，则 -l 参数会列出全部的信息名称。
+- -s <信息名称或编号> 　指定要送出的信息。
+- [程序] 　[程序]可以是程序的PID或是PGID，也可以是工作编号。
+
+使用 kill -l 命令列出所有可用信号。
+
+最常用的信号是：
+
+- 1 (HUP)：重新加载进程。
+- 9 (KILL)：杀死一个进程。
+- 15 (TERM)：正常停止一个进程。
+
+杀死进程
+
+```
+# kill 12345
+```
+
+彻底杀死进程
+
+```
+# kill -9 123456
+```
+
+
+
+# 硬件信息查看
+
+==lscpu命令==
+
+lscpu命令能够查看 CPU 和处理单元的信息。该命令没有任何其他选项或者别的功能。
+
+```shell
+lscpu
+```
+
+
+
+==lspci查看PCI总线==
+
+lspci是另一个命令行工具，可以用来列出所有的 PCI 总线，还有与 PCI 总线相连的设备的详细信息，比如 VGA 适配器、显卡、网络适配器、usb 端口、SATA 控制器等。
+
+```shell
+lspci -v | grep "VGA" -A 12 #可以过滤出特定设备的信息
+```
+
+
+
+# 防火墙设置
+
+
+
+
+
+
+
+# 程序安装
+
+一般安装软件有三种方式:
+
+- `rpm`。
+
+  ​	Linux rpm 命令用于管理套件。
+
+  ​	rpm（英文全拼：redhat package manager） 原本是 Red Hat Linux 发行版专门用来管理 Linux 各项套件的程序，由于它遵循 GPL 规则且功能强大方便，因而广受欢迎。逐渐受到其他发行版的采用。RPM 套件管理方式的出现，让 Linux 易于安装，升级，间接提升了 Linux 的适用度。
+
+- `解压缩`。
+
+- `yum`在线安装。
+
+## JDK安装
+
+使用的解压缩安装，官方下载JDK，`jdk-8u161-linux-x64.tar.gz`，在/usr目录下java文件夹，将jdk.gz放入，然后进行解压缩
+
+```shell
+tar -zxvf jdk-8u161-linux-x64.tar.gz
+```
+
+```shell
+[root@F4N etc]# cd /usr/java/
+[root@F4N java]# ls
+jdk1.8.0_161  jdk-8u161-linux-x64.tar.gz
+```
+
+然后在`/etc/profile`文件中添加环境变量:
+
+```shell
+ vim /etc/profile
+```
+
+在`profile`文件末尾中添加如下环境变量:
+
+```bash
+# Java Environment Path
+export JAVA_HOME=/usr/java/jdk1.8.0_161
+export PATH=$JAVA_HOME/bin:$PATH
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+```
+
+执行`source`命令让文件生效:
+
+```shell
+source /etc/profile
+```
+
+查看Java是否安装成功，出现版本号表示安装成功。
+
+```shell
+[root@F4N etc]# source /etc/profile
+[root@F4N etc]# java -version
+java version "1.8.0_161"
+Java(TM) SE Runtime Environment (build 1.8.0_161-b12)
+Java HotSpot(TM) 64-Bit Server VM (build 25.161-b12, mixed mode)
+```
+
+
+
+## Tomcat安装
+
+1. 下载 tomcat9 的压缩包tar.gz。
+
+   下载地址：https://downloads.apache.org/tomcat/tomcat-9/v9.0.48/bin/apache-tomcat-9.0.48.tar.gz
+
+2. 将下载的压缩包上传到云服务器的/usr目录下，新建目录 tomcat ，将压缩包移入并解压。
+
+   ```shell
+    tar -zxvf apache-tomcat-9.0.48.tar.gz
+   ```
+
+3. 解压后，进入`/usr/tomcat/apache-tomcat-9.0.48/bin`目录，执行`startup.sh` 
+
+   ```shell
+   #启动 ./startup.sh 
+   #终止 ./shutdown.sh 
+   ```
+
+   ```shell
+   [root@F4N bin]# ./startup.sh 
+   Using CATALINA_BASE:   /usr/tomcat/apache-tomcat-9.0.48
+   Using CATALINA_HOME:   /usr/tomcat/apache-tomcat-9.0.48
+   Using CATALINA_TMPDIR: /usr/tomcat/apache-tomcat-9.0.48/temp
+   Using JRE_HOME:        /usr/java/jdk1.8.0_161
+   Using CLASSPATH:       /usr/tomcat/apache-tomcat-9.0.48/bin/bootstrap.jar:/usr/tomcat/apache-tomcat-9.0.48/bin/tomcat-juli.jar
+   Using CATALINA_OPTS:   
+   Tomcat started.
+   ```
+
+4. 
+
+
+
+
+
+
+
