@@ -1541,6 +1541,61 @@ lspci -v | grep "VGA" -A 12 #可以过滤出特定设备的信息
 
 # 防火墙设置
 
+查看防火墙状态:
+
+```shell
+systemctl status firewalld
+```
+
+开启防火墙:
+
+```shell
+systemctl start firewalld
+```
+
+关闭防火墙:
+
+```shell
+systemctl stop firewalld
+```
+
+开机启动和禁用防火墙:
+
+```shell
+systemctl disable firewalld #开机禁用
+systemctl enable firewalld 	#开机启用 
+```
+
+防火墙配置立刻生效:
+
+```shell
+firewall-cmd --reload
+```
+
+查看防火墙开放的端口:
+
+```shell
+firewall-cmd --zone=public --list-ports
+```
+
+打开某一端口:
+
+```shell
+firewall-cmd --permanent --zone=public --add-port=3306/tcp
+#–zone #作用域
+#–add-port=80/tcp #添加端口，格式为：端口/通讯协议
+#–permanent #永久生效，没有此参数重启后失效
+#firewall-cmd --reload 并不中断用户连接，即不丢失状态信息
+#开放端口后需重载防火墙
+firewall-cmd --reload
+```
+
+关闭某一端口:
+
+```shell
+firewall-cmd --zone=public --remove-port=8081/tcp --permanent  
+```
+
 
 
 
@@ -1560,6 +1615,23 @@ lspci -v | grep "VGA" -A 12 #可以过滤出特定设备的信息
 - `解压缩`。
 
 - `yum`在线安装。
+
+  yum常用命令:
+
+  - 列出所有可更新的软件清单命令：**yum check-update**
+  - 更新所有软件命令：**yum update**
+  - 仅安装指定的软件命令：**yum install <package_name>**
+  - 仅更新指定的软件命令：**yum update <package_name>**
+  - 列出所有可安裝的软件清单命令：**yum list**
+  - 删除软件包命令：**yum remove <package_name>**
+  - 查找软件包命令：**yum search <keyword>**
+  - 清除缓存命令:
+    - **yum clean packages**: 清除缓存目录下的软件包
+    - **yum clean headers**: 清除缓存目录下的 headers
+    - **yum clean oldheaders**: 清除缓存目录下旧的 headers
+    - **yum clean, yum clean all (= yum clean packages; yum clean oldheaders)** :清除缓存目录下的软件包及旧的 headers
+
+
 
 ## JDK安装
 
@@ -1614,7 +1686,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.161-b12, mixed mode)
 
    下载地址：https://downloads.apache.org/tomcat/tomcat-9/v9.0.48/bin/apache-tomcat-9.0.48.tar.gz
 
-2. 将下载的压缩包上传到云服务器的/usr目录下，新建目录 tomcat ，将压缩包移入并解压。
+2. 将下载的压缩包上传到云服务器的`/usr`目录下，新建目录 tomcat ，将压缩包移入并解压。
 
    ```shell
     tar -zxvf apache-tomcat-9.0.48.tar.gz
@@ -1638,11 +1710,180 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.161-b12, mixed mode)
    Tomcat started.
    ```
 
-4. 
+4. 由于Tomcat使用的是`8080`端口，需要在防火墙中打开对应的端口访问权限
+
+   ```bash
+   [root@F4N bin]# systemctl status firewalld 			#查看防火墙状态，如果是关闭（dead）的，需要打开防火墙
+   ● firewalld.service - firewalld - dynamic firewall daemon
+      Loaded: loaded (/usr/lib/systemd/system/firewalld.service; disabled; vendor preset: enabled)
+      Active: active (running) since Tue 2021-06-22 10:15:18 CST; 26min ago
+        Docs: man:firewalld(1)
+    Main PID: 10649 (firewalld)
+      CGroup: /system.slice/firewalld.service
+              └─10649 /usr/bin/python2 -Es /usr/sbin/firewalld --nofork --nopid
+   
+   Jun 22 10:15:18 F4N systemd[1]: Starting firewalld - dynamic firewall daemon...
+   Jun 22 10:15:18 F4N systemd[1]: Started firewalld - dynamic firewall daemon.
+   Jun 22 10:15:18 F4N firewalld[10649]: WARNING: AllowZoneDrifting is enabled. This is considered an insecu... now.
+   Jun 22 10:19:42 F4N firewalld[10649]: WARNING: AllowZoneDrifting is enabled. This is considered an insecu... now.
+   Jun 22 10:28:48 F4N firewalld[10649]: WARNING: AllowZoneDrifting is enabled. This is considered an insecu... now.
+   Jun 22 10:32:34 F4N firewalld[10649]: WARNING: AllowZoneDrifting is enabled. This is considered an insecu... now.
+   Hint: Some lines were ellipsized, use -l to show in full.
+   [root@F4N bin]# systemctl start firewalld			#打开防火墙
+   [root@F4N bin]# firewall-cmd --list-ports			#查看开启的端口号,如果没有开启,需要手动开启端口
+   3306/tcp 80/tcp 443/tcp 22/tcp 3389/tcp 8080/tcp
+   [root@F4N bin]# firewall-cmd --permanent --zone=public --add-port=8080/tcp	#打开8080端口
+   success
+   [root@F4N bin]# firewall-cmd --reload				#重启防火墙
+   success
+   ```
+
+5. 在云服务器防火墙配置中打开8080端口
+
+   ![image-20210622105303487](asset/Linux.assets/image-20210622105303487.png)
+
+6. 可以通过公网IP地址进行访问了
+
+   ![image-20210622105451317](asset/Linux.assets/image-20210622105451317.png)
 
 
 
 
 
 
+
+## Docker安装
+
+​	Docker 是一个开源的应用容器引擎，基于 Go语言 并遵从 Apache2.0 协议开源。Docker 可以让开发者打包他们的应用以及依赖包到一个轻量级、可移植的容器中，然后发布到任何流行的 Linux 机器上，也可以实现虚拟化。
+
+​	容器是完全使用沙箱机制，相互之间不会有任何接口（类似 iPhone 的 app）,更重要的是容器性能开销极低。
+
+1. 卸载旧版本Docker
+
+   ```shell
+   [root@F4N bin]#  yum remove docker \
+   >                   docker-client \
+   >                   docker-client-latest \
+   >                   docker-common \
+   >                   docker-latest \
+   >                   docker-latest-logrotate \
+   >                   docker-logrotate \
+   >                   docker-engine
+   Loaded plugins: fastestmirror, langpacks
+   No Match for argument: docker
+   No Match for argument: docker-client
+   No Match for argument: docker-client-latest
+   No Match for argument: docker-common
+   No Match for argument: docker-latest
+   No Match for argument: docker-latest-logrotate
+   No Match for argument: docker-logrotate
+   No Match for argument: docker-engine
+   No Packages marked for removal
+   ```
+
+2. 安装前置需要的一些软件包
+
+   ```shell
+   yum install -y lvm2 device-mapper-persistent-data yum-utils
+   
+   [root@F4N bin]# yum install -y lvm2 device-mapper-persistent-data yum-utils
+   Loaded plugins: fastestmirror, langpacks
+   Loading mirror speeds from cached hostfile
+   Package 7:lvm2-2.02.187-6.el7_9.5.x86_64 already installed and latest version
+   Package device-mapper-persistent-data-0.8.5-3.el7_9.2.x86_64 already installed and latest version
+   Package yum-utils-1.1.31-54.el7_8.noarch already installed and latest version
+   Nothing to do
+   ```
+
+3. 安装Docker，使用阿里云镜像
+
+   ```shell
+   [root@F4N bin]# yum-config-manager   --add-repo   http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+   Loaded plugins: fastestmirror, langpacks
+   adding repo from: http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+   grabbing file http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo to /etc/yum.repos.d/docker-ce.repo
+   repo saved to /etc/yum.repos.d/docker-ce.repo
+   ```
+
+4. 更新yum软件包索引
+
+   ```shell
+   yum makecache fast
+   ```
+
+5. 下载安装Docker CE
+
+   ```shell
+   yum -y install docker-ce docker-ce-cli containerd.io
+   ```
+
+6. 启动docker
+
+   ```shell
+   systemctl start docker
+   ```
+
+7. 测试docker是否安装成功,并运行hello world程序
+
+   ```shell
+   [root@F4N bin]# docker version
+   Client: Docker Engine - Community
+    Version:           20.10.7
+    API version:       1.41
+    Go version:        go1.13.15
+    Git commit:        f0df350
+    Built:             Wed Jun  2 11:58:10 2021
+    OS/Arch:           linux/amd64
+    Context:           default
+    Experimental:      true
+   
+   Server: Docker Engine - Community
+    Engine:
+     Version:          20.10.7
+     API version:      1.41 (minimum version 1.12)
+     Go version:       go1.13.15
+     Git commit:       b0f5bc3
+     Built:            Wed Jun  2 11:56:35 2021
+     OS/Arch:          linux/amd64
+     Experimental:     false
+    containerd:
+     Version:          1.4.6
+     GitCommit:        d71fcd7d8303cbf684402823e425e9dd2e99285d
+    runc:
+     Version:          1.0.0-rc95
+     GitCommit:        b9ee9c6314599f1b4a7f497e1f1f856fe433d3b7
+    docker-init:
+     Version:          0.19.0
+     GitCommit:        de40ad0
+     
+   [root@F4N bin]# docker run hello-world
+   Unable to find image 'hello-world:latest' locally
+   latest: Pulling from library/hello-world
+   b8dfde127a29: Pull complete 
+   Digest: sha256:9f6ad537c5132bcce57f7a0a20e317228d382c3cd61edae14650eec68b2b345c
+   Status: Downloaded newer image for hello-world:latest
+   
+   Hello from Docker!
+   This message shows that your installation appears to be working correctly.
+   
+   To generate this message, Docker took the following steps:
+    1. The Docker client contacted the Docker daemon.
+    2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+       (amd64)
+    3. The Docker daemon created a new container from that image which runs the
+       executable that produces the output you are currently reading.
+    4. The Docker daemon streamed that output to the Docker client, which sent it
+       to your terminal.
+   
+   To try something more ambitious, you can run an Ubuntu container with:
+    $ docker run -it ubuntu bash
+   
+   Share images, automate workflows, and more with a free Docker ID:
+    https://hub.docker.com/
+   
+   For more examples and ideas, visit:
+    https://docs.docker.com/get-started/
+   ```
+
+   
 
