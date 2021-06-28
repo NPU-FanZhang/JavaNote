@@ -119,11 +119,13 @@ public class CrosConfig implements WebMvcConfigurer {
 
 
 
+
+
+
+
 # 报错处理
 
 ## 1.	Error creating bean with name 'userRepository' defined in com.zhang.note.repository.UserRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Invocation of init method failed; nested exception is java.lang.IllegalArgumentException: Not a managed type: class java.lang.Object
-
----
 
 声明接口未加`<User,Integer>`，添加即可。
 
@@ -135,8 +137,6 @@ public interface UserRepository extends JpaRepository<User,Integer> {
 
 
 ## 2.	java.lang.NullPointerException at com.zhang.note.repository.UserRepositoryTest.findAll(UserRepositoryTest.java:14)
-
----
 
 空指针错误，注入bean未写@Autowired注解，没能自动注入。
 
