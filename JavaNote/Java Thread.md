@@ -40,19 +40,19 @@
 
 ## 线程创建
 
+```java
+	When code running in some thread creates a new {@code Thread} object, the new thread has its priority initially set equal to the priority of the creating thread, and is a daemon thread if and only if the creating thread is a daemon.
+```
+
 线程创建的三种方法：
 
 - 继承Thread类。
 - 实现Runnable接口。
 - 实现Callable接口。
 
-```
-	When code running in some thread creates a new {@code Thread} object, the new thread has its priority initially set equal to the priority of the creating thread, and is a daemon thread if and only if the creating thread is a daemon.
-```
 
 
-
-### 继承Thread类
+### 继承Thread类 
 
 - 子类继承Thread类从而可以进行多线程实现。
 - 启动线程 `thread.start()`
@@ -91,7 +91,7 @@ public class Thread1 extends Thread {
 
 ### 实现Runnable接口
 
-- 实验runnable接口，传入Thread对象以实现多线程。
+- 实现runnable接口，传入Thread对象以实现多线程。
 - 启动线程： 传入目标thread对象，`new thread(runnable).start()`。
 - ==推荐使用==--可以避免单继承的局限性，灵活方便。
 
@@ -129,6 +129,484 @@ public class ThreadRunnableBuild implements Runnable {
     }
 }
 ```
+
+
+
+### 实现Callable接口
+
+五个步骤：
+
+- 实现Callable接口，重写Call方法。
+- 实例化 callable实现类的对象
+- 创建线程池
+- 提交执行，获取结果
+- 关闭服务
+
+```java
+// 实现 Callable接口有返回值
+// 可以抛出异常
+public class ThreadCallable implements Callable<Boolean> {
+    private String url;
+    private String name;
+
+    public ThreadCallable(String url, String name) {
+        this.url = url;
+        this.name = name;
+    }
+
+    //实现Callable接口需要实现call方法
+    @Override
+    public Boolean call() throws Exception{
+        Downloader webDownloader = new Downloader();
+        webDownloader.downloader(url, name);
+        System.out.println("下载的文件为：" + name);
+        return true;
+    }
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+        ThreadCallable ThreadCallable1 = new ThreadCallable("https://w.wallhaven.cc/full/8o/wallhaven-8oky1j.jpg", "imageDown1.jpg");
+        ThreadCallable ThreadCallable2 = new ThreadCallable("https://w.wallhaven.cc/full/e7/wallhaven-e7ek7k.jpg", "imageDown2.jpg");
+
+        // 启动方法不同
+        ExecutorService threadPool = Executors.newFixedThreadPool(3);//线程池大小3
+
+        //提交执行
+        Future<Boolean> submit1 = threadPool.submit(ThreadCallable1);
+        Future<Boolean> submit2 = threadPool.submit(ThreadCallable2);
+        //获取结果
+        boolean rs1 = submit1.get();
+        boolean rs2 = submit2.get();
+        //关闭服务
+        threadPool.shutdownNow();
+
+    }
+}
+
+class Downloader {
+    public void downloader(String url, String name) {
+        try {
+            FileUtils.copyURLToFile(new URL(url), new File(name));
+        } catch (IOException e) {
+            System.out.println("IO 异常");
+            e.printStackTrace();
+        }
+    }
+
+}
+```
+
+
+
+## 线程状态
+
+Java中线程的状态比操作系统进程状态稍微细分了一下：
+
+- `New`			--新建状态
+- `RUNNABLE`      --可运行状态、就绪状态
+- `BLOCKED`       --阻塞状态
+- `WAITING`       --等待状态
+- `TIMED_WAITING`  --超时等待
+- `TERMINATED`     --终止状态
+
+```java
+ public enum State {
+        /**
+         * Thread state for a thread which has not yet started.
+         */
+        NEW,
+
+        /**
+         * Thread state for a runnable thread.  A thread in the runnable
+         * state is executing in the Java virtual machine but it may
+         * be waiting for other resources from the operating system
+         * such as processor.
+         */
+        RUNNABLE,
+
+        /**
+         * Thread state for a thread blocked waiting for a monitor lock.
+         * A thread in the blocked state is waiting for a monitor lock
+         * to enter a synchronized block/method or
+         * reenter a synchronized block/method after calling
+         * {@link Object#wait() Object.wait}.
+         */
+        BLOCKED,
+
+        /**
+         * Thread state for a waiting thread.
+         * A thread is in the waiting state due to calling one of the
+         * following methods:
+         * <ul>
+         *   <li>{@link Object#wait() Object.wait} with no timeout</li>
+         *   <li>{@link #join() Thread.join} with no timeout</li>
+         *   <li>{@link LockSupport#park() LockSupport.park}</li>
+         * </ul>
+         *
+         * <p>A thread in the waiting state is waiting for another thread to
+         * perform a particular action.
+         *
+         * For example, a thread that has called <tt>Object.wait()</tt>
+         * on an object is waiting for another thread to call
+         * <tt>Object.notify()</tt> or <tt>Object.notifyAll()</tt> on
+         * that object. A thread that has called <tt>Thread.join()</tt>
+         * is waiting for a specified thread to terminate.
+         */
+        WAITING,
+
+        /**
+         * Thread state for a waiting thread with a specified waiting time.
+         * A thread is in the timed waiting state due to calling one of
+         * the following methods with a specified positive waiting time:
+         * <ul>
+         *   <li>{@link #sleep Thread.sleep}</li>
+         *   <li>{@link Object#wait(long) Object.wait} with timeout</li>
+         *   <li>{@link #join(long) Thread.join} with timeout</li>
+         *   <li>{@link LockSupport#parkNanos LockSupport.parkNanos}</li>
+         *   <li>{@link LockSupport#parkUntil LockSupport.parkUntil}</li>
+         * </ul>
+         */
+        TIMED_WAITING,
+
+        /**
+         * Thread state for a terminated thread.
+         * The thread has completed execution.
+         */
+        TERMINATED;
+    }
+```
+
+<img src="asset/Java Thread.assets/7e76cc17-0ad5-3ff3-954e-1f83463519d1.jpg" alt="img" style="zoom: 67%;" />
+
+```java
+public class ThreadState {
+    public static void main(String[] args) throws InterruptedException {
+        Thread thread = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("------");
+            }
+        });
+
+        Thread.State state = thread.getState();
+
+        System.out.println(state);//NEW
+
+        thread.start();
+        state = thread.getState();
+        System.out.println(state);//RUNNABLE
+
+        while (state != Thread.State.TERMINATED) {
+            Thread.sleep(100);
+            state = thread.getState();
+            System.out.println(state);
+        }
+    }
+}
+NEW
+RUNNABLE
+TIMED_WAITING
+------
+TIMED_WAITING
+TIMED_WAITING
+------
+TIMED_WAITING
+TIMED_WAITING
+------
+TIMED_WAITING
+TIMED_WAITING
+------
+TIMED_WAITING
+TIMED_WAITING
+------
+TERMINATED
+```
+
+
+
+### 线程停止
+
+ * 1.建议线程正常停止-> 不推荐使用死循环等方法，推荐使用次数或标志位等来实现。
+ * 2.不推荐使用自带的stop、destroy等过时的JDK方法。
+
+```java
+/*
+ * 测试stop
+ * 1.建议线程正常停止-> 不推荐使用死循环等方法，推荐使用次数或标志位等来实现。
+ * 2.不推荐使用自带的stop、destroy等过时的JDK方法。
+ * */
+public class ThreadStop implements Runnable {
+    private boolean flag = true;
+
+    @Override
+    public void run() {
+        int i = 0;
+        while (flag) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(" Thread run -- " + i++);
+        }
+    }
+
+    public void stop() {
+        this.flag = false;
+    }
+
+    public static void main(String[] args) {
+        ThreadStop threadStop = new ThreadStop();
+        new Thread(threadStop).start();
+
+
+        for (int i = 0; i < 15; i++) {
+            System.out.println("main -- "+ i);
+            if (i == 9){
+                threadStop.stop();
+                System.out.println("thread stop.");
+            }
+        }
+    }
+}
+```
+
+
+
+### 线程休眠 sleep
+
+- sleep 指定当前线程阻塞的毫秒数。
+- sleep 存在异常 `interruptedException`
+- sleep 可以模拟网络延迟，倒计时。
+- sleep 时间到后，线程进入就绪状态。
+- 每一个对象都有一把锁，sleep不会释放锁。
+
+```java
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class ThreadSleep implements Runnable {
+    private static int ticket = 10;
+
+    @Override
+    public void run() {
+        while (ticket >= 0) {
+            try {
+                //模拟网络延迟，可以看到线程不安全
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(Thread.currentThread().getName() + "" +
+                    " get No." + ticket-- + " ticket");
+        }
+    }
+    public static void main(String[] args) throws InterruptedException {
+        ThreadSleep threadSleep = new ThreadSleep();
+        new Thread(threadSleep, "Zhang").start();
+        new Thread(threadSleep, "Fan").start();
+        new Thread(threadSleep, "wang").start();
+
+        //倒计时
+        tenDown();
+    }
+
+    //模拟倒计时
+    public static void tenDown() throws InterruptedException {
+        int num = 10;
+        while (true) {
+            Thread.sleep(1000);
+            System.out.println(num--);
+            if (num <= 0) {
+                break;
+            }
+        }
+    }
+}
+
+```
+
+
+
+### 线程礼让 yield
+
+让当前正在执行的线程暂停，但不阻塞。将线程从运行状态转为就绪状态。
+
+- 让CPU重新调度，但礼让`不一定成功`，需要看调度策略。
+
+```java
+Thread.yield();
+```
+
+
+
+### 线程强行执行 join
+
+Join 合并线程，等此线程执行完成后，再执行其他线程，在此过程中，其他线程阻塞。
+
+可以理解为`插队`。
+
+```java
+public class ThreadJoin implements Runnable {
+    @Override
+    public void run() {
+        for (int i = 0; i < 100; i++) {
+            System.out.println("Thread is running " + i);
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+
+        ThreadJoin threadJoin = new ThreadJoin();
+        Thread thread = new Thread(threadJoin);
+        thread.start();
+
+        for (int i = 0; i < 100; i++) {
+            if (i == 50) {
+                thread.join();// 此时main阻塞
+            }
+            System.out.println("Main is running .." + i);
+        }
+    }
+}
+```
+
+
+
+
+
+
+
+## 线程优先级
+
+
+
+
+
+# Lambda 表达式
+
+为什么用 Lambda--$\lambda$ 表达式：
+
+- 避免匿名内部类定义过多。
+- 让代码看起来更加简洁。
+- 去掉了一些没有意义的代码，只留下核心逻辑。
+
+
+
+`函数式接口` 是学习Java 8 Lambda 表达式的关键。
+
+`函数式接口`：任何接口，如果只包含了一个唯一的抽象方法，那么它就是一个函数式接口。
+
+```java
+public interface Runnable{
+    public abstract void run();
+}
+```
+
+Lambda表达式的格式：
+
+```java
+ILike like5 = ()->{
+            System.out.println("this is lambda...");
+        };
+```
+
+
+
+例子：
+
+```java
+public class Lambda {
+    // 3.静态内部类
+    static class Like2 implements ILike {
+        @Override
+        public void lambda() {
+            System.out.println("Static inner class....");
+        }
+    }
+    public static void main(String[] args) {
+        //接口指向实现类对象
+        ILike like = new Like();
+        like.lambda();
+
+        ILike like2 = new Like2();
+        like2.lambda();
+
+        // 4. 局部内部类
+        class Like3 implements ILike{
+            @Override
+            public void lambda() {
+                System.out.println("part Inner class..");
+            }
+        }
+        ILike like3 = new Like3();
+        like3.lambda();
+
+        // 5.匿名内部类 没有类名称，需要借助接口或父类实现
+
+        ILike like4 = new ILike() {
+            @Override
+            public void lambda() {
+                System.out.println("anonymous inner class...");
+            }
+        };
+        like4.lambda();
+
+        // 6.lambda简化,必须借助函数式接口
+
+        ILike like5 = ()->{
+            System.out.println("this is lambda...");
+        };
+        like5.lambda();
+        //简化，一行代码才可以简化成这样
+        // 传入参数可以省略数据类型
+        like5 = ()->System.out.println("fuc");
+        like5.lambda();
+
+    }
+}
+
+// 1.定义一个函数式接口
+interface ILike {
+    void lambda();
+}
+
+// 2.实现类
+class Like implements ILike {
+    @Override
+    public void lambda() {
+        System.out.println("outer class...");
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
