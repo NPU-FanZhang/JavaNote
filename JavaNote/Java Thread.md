@@ -477,13 +477,229 @@ public class ThreadJoin implements Runnable {
 
 
 
-
-
-
-
 ## 线程优先级
 
+​	Java提供一个`线程调度器`来监控程序中启动后进入就绪状态的所有线程，线程调度器按照优先级决定应该调度那个线程来执行。
 
+线程的优先级用数字表示，范围 1-10。
+
+- ```java
+  Thread.MAX_PRIORITY = 10;
+  ```
+
+- ```java
+  Thread.MIN_PRIORITY = 1;
+  ```
+
+- ```java
+  Thread.NORM_PRIORITY = 5;
+  ```
+
+使用 `thread.getPriority()` 获取线程优先级。
+
+使用 `thread.setPriority(int x)` 设置线程优先级。
+
+- 先设置优先级再启动。
+
+```java
+优先级低只是意味着获得调度的概率低，并不是优先级低就不会被调用了，仍然要看CPU的调度。
+```
+
+```java
+public class ThreadPriority implements Runnable {
+    @Override
+    public void run() {
+        System.out.println(Thread.currentThread().getName() + " --> " + Thread.currentThread().getPriority());
+    }
+
+    public static void main(String[] args) {
+        ThreadPriority threadPriority = new ThreadPriority();
+        Thread t1 = new Thread(threadPriority);
+        Thread t2 = new Thread(threadPriority);
+        Thread t3 = new Thread(threadPriority);
+        Thread t4 = new Thread(threadPriority);
+        System.out.println(Thread.currentThread().getName() + " --> " + Thread.currentThread().getPriority());
+        
+        t1.start();
+        // 先设置优先级再启动。
+        t2.setPriority(1);
+        t2.start();
+        t3.setPriority(5);
+        t3.start();
+        t4.setPriority(Thread.MAX_PRIORITY);
+        t4.start();
+        
+//        main --> 5
+//        Thread-0 --> 5
+//        Thread-3 --> 10
+//        Thread-2 --> 5
+//        Thread-1 --> 1
+    }
+}
+```
+
+
+
+## 线程不安全案例
+
+1. 常用类--线程不安全
+
+   ```java
+   ArrayList<String> Alist = new ArrayList<>();
+   for (int i = 0; i < 1000; i++) {
+       new Thread(()->{
+           Alist.add(Thread.currentThread().getName());
+       }).start();
+   }
+   System.out.println(Alist.size());//991
+   ```
+
+2. 买票
+
+   ```java
+   class BuyTicket implements Runnable {
+       private int ticketNum = 10;
+   
+       private boolean flag = true;//外部停止方式
+   
+       @Override
+       public void run() {
+           while (flag) {
+               try {
+                   buy();
+               } catch (InterruptedException e) {
+                   e.printStackTrace();
+               }
+           }
+   
+       }
+       private void buy() throws InterruptedException {
+           if (ticketNum <= 0) {
+               flag = false;
+               return;
+           } else {
+               Thread.sleep(200);
+               System.out.println(Thread.currentThread().getName() + " buy " + ticketNum--);
+           }
+       }
+       public static void main(String[] args) {
+           BuyTicket buyTicket = new BuyTicket();
+   
+           Thread t1 = new Thread(buyTicket, "F4N");
+           Thread t2 = new Thread(buyTicket, "ZHANG");
+           Thread t3 = new Thread(buyTicket, "Lisa");
+           t1.start();
+           t2.start();
+           t3.start();
+           Lisa buy 10
+   //        ZHANG buy 9
+   //        F4N buy 8
+   //        ZHANG buy 7
+   //        Lisa buy 7
+   //        F4N buy 7
+   //        Lisa buy 6
+   //        ZHANG buy 5
+   //        F4N buy 4
+   //        Lisa buy 2
+   //        ZHANG buy 3
+   //        F4N buy 1
+       }
+   }
+   //会出现多人买到同一张票
+   ```
+
+3. 银行取款
+
+   
+
+## 线程同步 synchronized
+
+​	`多个线程`访问同一对象(内存)，并且某些线程想要修改这个对象(内存)时，会造成数据不一致的情况，这个时候就需要线程同步。线程同步其实是一种`等待机制`。
+
+
+
+锁机制会导致的问题：
+
+- 一个线程持有锁会导致其他所有需要此锁的`线程挂起`。
+- 多线程竞争情况下，加锁、释放锁还会导致较多的`上下文切换`和`调度延迟`，引起性能问题。
+- 如果一个优先级高的线程等待一个优先级低的线程释放锁，会导致`优先级倒置`，引起性能问题。
+
+
+
+代码使用 `synchronized` 关键字可以进行加锁，实现线程同步。
+
+- `synchronized`直接用于方法的定义，默认 `锁this`。形成 `同步方法`。
+
+  ```java
+  private synchronized  void method(){}
+  ```
+
+- `synchronized` 锁一个对象，形成`同步块`。
+
+  ```java
+  ArrayList<String> Alist = new ArrayList<>();
+  for (int i = 0; i < 1000; i++) {
+      new Thread(()->{
+          synchronized (Alist){
+              Alist.add(Thread.currentThread().getName());
+          }
+      }).start();
+  }
+  Thread.sleep(1000);
+  System.out.println(Alist.size());//1000
+  ```
+
+  
+
+
+
+
+
+
+
+## 守护线程 daemon
+
+- 线程分为 `用户线程` 和 `守护线程`。
+- 虚拟机必须确保用户线程执行完毕。
+- `虚拟机不用等待守护线程执行完毕。会在其他线程执行完毕后自动结束。`如： 后台记录操作日志、监控内存、垃圾回收...
+
+常见的用户线程：`main()`
+
+常见的守护线程: `GC()`
+
+```java
+// 测试 守护线程
+public class ThreadDaemon implements Runnable {
+    @Override
+    public void run() {
+        for (int i = 0; i < 36; i++) {
+            System.out.println(i+" -- Have a good day.");
+        }
+        System.out.println("goodbye world!");
+    }
+    public static void main(String[] args) {
+        ThreadDaemon threadDaemon = new ThreadDaemon();
+        God god = new God();
+
+        Thread GodThread = new Thread(god);
+        //if {@code true}, marks this thread as a daemon thread
+        GodThread.setDaemon(true);
+        GodThread.start();
+        Thread threadYou = new Thread(threadDaemon);
+        threadYou.start();
+    }
+}
+
+class God implements Runnable {
+    @Override
+    public void run() {
+        while (true) {
+            System.out.println("GOD bless you!");
+        }
+    }
+}
+
+```
 
 
 
