@@ -610,7 +610,67 @@ public class ThreadPriority implements Runnable {
 
 3. 银行取款
 
-   
+
+
+
+## 线程死锁
+
+产生死锁的四个必要条件:
+
+- `互斥`条件：一个资源每次只能被一个进程使用。
+- `请求与保持`条件：一个进程因请求资源而阻塞，对已获得的资源保持不放。
+- `不可剥夺`条件：进程已获得资源，在未使用完之前，不可进行剥夺。
+- `循环等待`条件: 若干进程之间形成一种头尾相接的资源循环等待关系。
+
+一个Java线程阻塞的例子：
+
+```java
+//thread1
+synchronized (s1) {
+    // --- 
+    Thread.sleep(100);
+    synchronized (s2) {
+        // ---
+    }
+}
+//thread2
+synchronized (s2) {
+    //---
+    Thread.sleep(1000);
+    synchronized (s1) {
+        //---
+    }
+}
+```
+
+## Lock锁
+
+JDK5开始，Java提供了强大的线程同步机制--显示的定义同步锁来实现线程同步。
+
+- `java.util.concurrent.locks.Lock` 接口是控制多线程对共享资源进行访问控制的工具。
+- 锁提供了对共享资源的独占访问，每次只能有一个线程对Lock对象加锁，线程开始访问共享资源之前应先获得Lock对象。
+- `ReentrantLock`是`Lock`的一个实现类，在实现线程安全控制中，比较常用的是`ReentrantLock`，可以显示的加锁，释放锁。
+
+```java
+private final ReentrantLock lock1 = new ReentrantLock();
+lock1.lock();// 加锁
+try {
+    //--线程方法
+} finally {
+    lock1.unlock();
+}
+```
+
+
+
+### synchronized和Lock锁对比
+
+- `Lock`是显式锁，需要手动开启和关闭。`synchronized`是隐式锁，出了作用域自动释放。
+- `Lock`只有代码块锁，`synchronized`有代码块锁和方法锁。
+- `Lock` 锁，JVM将花费较少的时间来调度线程，性能更好。
+- 使用顺序： Lock > 同步代码块 > 同步方法
+
+
 
 ## 线程同步 synchronized
 
@@ -651,7 +711,117 @@ public class ThreadPriority implements Runnable {
 
   
 
+## 线程池
 
+Java 5.0 提供了线程池相关API：`ExecutorService` 和 `Executors`。
+
+- ExecutorService: 真正的线程池接口，常见的子类 `ThreadPoolExecutor`
+- Executors 工具类，线程池的工厂类，用于创建并返回不同类型的线程池。 
+
+```java
+// 1.创建服务,
+// newFixedThreadPool 参数为线程池大小。
+ExecutorService threadPool = Executors.newFixedThreadPool(5);
+
+//2. 启动线程服务
+threadPool.execute(new MyThread());
+threadPool.execute(new MyThread());
+threadPool.execute(new MyThread());
+threadPool.execute(new MyThread());
+
+// 3.关闭线程池
+threadPool.shutdownNow();
+```
+
+
+
+## 生产者消费者问题
+
+
+
+### 缓冲区法-管程法
+
+```java
+public class ConsumerProducer {
+    public static void main(String[] args) {
+        SynContainer container = new SynContainer();
+        Producer producer = new Producer(container);
+        Consumer consumer = new Consumer(container);
+        producer.start();
+        consumer.start();
+    }
+}
+//生产者
+class Producer extends Thread {
+    SynContainer container;
+    public Producer(SynContainer container) {
+        this.container = container;
+    }
+    @Override
+    public void run() {
+        for (int i = 0; i < 100; i++) {
+            System.out.println("生产 " + i + " Data");
+            container.push(new TestData(i));
+        }
+    }
+}
+//消费者
+class Consumer extends Thread {
+    SynContainer container;
+    public Consumer(SynContainer container) {
+        this.container = container;
+    }
+    @Override
+    public void run() {
+        for (int i = 0; i < 100; i++) {
+            System.out.println("消费了 " + container.pop().id + " 只鸡。");
+        }
+    }
+}
+
+class TestData {
+    int id;
+    public TestData(int id) {
+        this.id = id;
+    }
+}
+
+//缓冲区
+class SynContainer {
+    TestData[] testData = new TestData[10];
+    int count = 0;
+    public synchronized void push(TestData testData) {
+        if (count == this.testData.length) {
+            //满了
+            //生产等待
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        this.testData[count] = testData;
+        count++;
+        this.notifyAll();
+
+    }
+    public synchronized TestData pop() {
+        if (count == 0) {
+            //生产
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        count--;
+        TestData product = testData[count];
+        this.notifyAll();
+        return product;
+    }
+}
+```
 
 
 
