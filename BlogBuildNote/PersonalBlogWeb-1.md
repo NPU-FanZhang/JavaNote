@@ -143,12 +143,16 @@ npm config set registry https://registry.npm.taobao.org
    
    ```
 
+   
+
 4. main.js中引入axios
 
    ```javascript
    import axios from 'axios';
    app.config.globalProperties.$axios = axios;
    ```
+
+   
 
 5. 调用方法
 
