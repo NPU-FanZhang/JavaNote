@@ -2,6 +2,10 @@
 
 > 分布式版本控制系统
 
+[TOC]
+
+
+
 ## 简单理论
 
 四个工作区域：
@@ -198,4 +202,77 @@ The key's randomart image is:
     $ git pull
     Already up to date.
     ```
+
+
+
+## Branch 分支管理
+
+新建分支
+
+```sh
+git branch [newbranch] [master] # 新建一个基于master分支 newbranch
+git checkout [newbranch]
+
+# 然后将新建的分支提交到 远程git服务器
+# push 方法1
+git push -u origin
+#新建分支第一次push，会提示：
+  fatal: The current branch newbr has no upstream branch.
+  To push the current branch and set the remote as upstream, use
+    git push --set-upstream origin newbranch
+#输入这行命令，然后输入用户名和密码，就push成功了。
+git push --set-upstream origin [newbranch]
+　　以后的push就只需要输入git push origin
+　　
+# push 方法2
+# 新建了一个叫[newbranch]的分支，而github网站上还没有，可以直接：
+git push -u origin [newbranch]
+　　这样一个新分支就创建好了。
+
+# push 方法3
+# 提交到github的分支有多个，提交时可以用这样的格式：
+git push -u origin local:remote
+　　比如：git push -u origin dev:master
+　　表明将本地的dev分支（冒号前）push到github的master分支（冒号后）。
+　　如果左边不写为空，将会删除远程的右边分支。
+```
+
+切换分支
+
+```sh
+git checkout [branch]
+```
+
+删除分支
+
+```sh
+git branch -d [branch]	#删除本地名为branch的分支
+git push origin --delete [branch]	#删除远程仓库中名为branch的分支
+```
+
+合并分支
+
+```sh
+#例如将branch合并到master
+git checkout [master]	#切换到主分支
+git merge --no-ff [branch]	#然后把develop分支merge过来
+#参数意义：
+　　不用参数的默认情况下，是执行快进式合并。
+　　使用参数--no-ff，会执行正常合并，在master分支上生成一个新节点。
+　　merge的时候如果遇到冲突，就手动解决，然后重新add，commit即可。
+```
+
+查看分支
+
+```sh
+git remote show origin # 查看远程分支和本地分支的对应关系
+git branch # 查看 本地分支
+git branch -r	# 查看 远程分支
+git branch -a	# 查看 本地远程分支
+
+```
+
+
+
+
 
