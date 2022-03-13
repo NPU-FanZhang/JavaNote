@@ -154,9 +154,126 @@ public static void testFileReader1() {
 
 
 
+### 标准的输入输出流
+
+```java
+/*
+ *  标准的输入流
+ *  System.in: 标准的输入流,默认从键盘输入
+ *  System.out: 标准的输出流,默认从控制台输出
+ *
+ *  System类的setIn(InputStream is) / setOut(PrintStream ps)方式重新指定输入输出的流
+* */
+```
+
+```java
+// 实现一个输入转为大写的程序
+// 1. 用Scanner实现
+// 2. 用System.in实现
+//    System.in --> 转换流 --> BufferedReader 的 readLine()
+
+InputStreamReader isr = new InputStreamReader(System.in);
+BufferedReader br = new BufferedReader(isr);
+while (true){
+    String s = br.readLine();
+    if ("e".equalsIgnoreCase(s) || "exit".equalsIgnoreCase(s) ){
+        System.out.println("EXIT.");
+        break;
+    }
+    System.out.println(s.toUpperCase());
+}
+br.close();
+```
 
 
 
+### 打印流
+
+```java
+// 打印流
+// PrintStream PrintWriter
+// 它们提供了一系列的 print println方法
+// 可以使用System.setOut()设置答应的目标,默认为显示器
+FileOutputStream fos = new FileOutputStream(new File("Interview//IO//hello.txt"));
+PrintStream stream = new PrintStream(fos);
+// 把输入目的地改为文件,而不是显示器
+if (stream != null) System.setOut(stream);
+System.out.println();
+```
+
+### 数据流
+
+主要是为了 ==为了方便操作Java语言中的基本类型和 String==
+
+```java
+//        DataInputStream 套接到 InputStream
+//        DataOutputStream 套接到 OutputStream
+DataOutputStream dos = new DataOutputStream(new FileOutputStream("Interview//IO//hello.txt"));
+dos.writeUTF("中国");
+// 刷新操作 flush-冲洗
+dos.flush();
+dos.writeInt(23);
+dos.flush();
+dos.writeBoolean(true);
+dos.close();
+
+DataInputStream dis = new DataInputStream(new FileInputStream("Interview//IO//hello.txt"));
+String country = dis.readUTF();
+int age = dis.readInt();
+boolean b = dis.readBoolean();
+System.out.println(country+" "+age+" "+b);
+dis.close();
+```
+
+对象流:
+
+ObjectInputStream ObjectOutputStream
+*  用以存储和读取 对象类型 和 基本类型 的处理流
+*  通过 序列化 与 反序列化 来进行对对象数据的 保存 和 读取
+*  ObjectOutputStream 和 ObjectInputStream 不能序列化 static和transient 修饰的成员变量
+
+
+
+
+
+### 基本知识点汇总:
+
+1. 流的三种分类方式
+
+   - 流向: 输入流、输出流
+   - 数据单位：字节流、字符流
+   - 流的角色：节点流、处理流
+
+2. 写出4个IO流中的抽象基类,4个文件流,4个缓冲流
+
+   抽象基类:
+
+   - InputStream
+   - OutputStream
+   - Reader
+   - Writer
+
+   文件流:
+
+   - FileReader
+   - FileWriter
+   - FileInputStream
+   - FileOutputStream
+
+   缓冲流:
+
+   - BufferedReader
+   - BufferedWriter
+   - BufferedInputStream
+   - BufferedOutputStream
+
+   转换流:`InputSteamReader` `OutputStreamWriter`
+
+3. 字符流和字节流分别的使用情景
+
+   字节流: 主要用来处理非文本文件
+
+   字符流: 主要用来处理文本文件
 
 
 
