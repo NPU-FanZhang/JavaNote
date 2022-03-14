@@ -142,19 +142,245 @@ public static void testFileReader1() {
 
 ### 4. FileWriter
 
+```java
+	// 从内存中写出数据到磁盘的文件里。
+	/*
+     *  输出操作 对应File可以不存在,会自动创建,不会爆异常
+     *          如果存在,可以根据第二个参数确定是否追加,默认不追加,进行覆盖
+     *          FileWriter fw = new FileWriter(file,false/true);
+     * */
+public static void TestFileWriter() throws IOException {
+
+    FileWriter fw = null;
+    try {
+        File file = new File("Interview//IO//helloWriter.txt");
+        System.out.println(file.getAbsolutePath());
+        // file文件本身没有写出的能力,
+        fw = new FileWriter(file, false);
+        fw.write("Fuck F4N!");
+        fw.write("2022-3-11");
+    } catch (IOException e) {
+        e.printStackTrace();
+    } finally {
+        if (fw != null) fw.close();
+    }
+}
+```
+
+### 5. 复制操作
+
+```java
+// 对文件的读写,做一个复制操作
+public static void TestFileReaderWriter() throws IOException {
+    FileReader fr = null;
+    FileWriter fw = null;
+    try {
+        File srcFile = new File("Interview//IO//hello.txt");
+        File destFile = new File("Interview//IO//helloWriter.txt");
 
 
+        fr = new FileReader(srcFile);
+        fw = new FileWriter(destFile,true);
+        char[] cBuf = new char[5];
+        int len;
+        while ((len = fr.read(cBuf)) != -1) {
+            fw.write(cBuf, 0, len);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    } finally {
+        try {
+            if (fw != null) fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        try {
+            if (fr != null) fr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
 
+### 6. FileInputOutputStream处理图片
 
+处理图片、视频等需要用字节流，字节流处理字符可能出现乱码问题，尤其是中文。但==实际上，如果只进行复制操作，而在程序中不进行加工，就没什么影响。==
 
+文本文件：.txt .java .c .cpp ...
 
+非文本文件: .jpg .mp3 .doc .ppt ...
 
+```java
+ // 使用字节流处理图片
+public static void ImgTestFileInputOutputStream   () throws IOException {
+    FileInputStream fr = null;
+    FileOutputStream fw = null;
+    try {
+        File srcFile = new File("Interview//IO//testimg.jpg");
+        File destFile = new File("Interview//IO//copyimg.jpg");
 
+        fr = new FileInputStream(srcFile);
+        fw = new FileOutputStream(destFile);
+        byte[] cBuf = new byte[5];
+        int len;
+        while ((len = fr.read(cBuf)) != -1) {
+            fw.write(cBuf, 0, len);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    } finally {
+        try {
+            if (fw != null) fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        try {
+            if (fr != null) fr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
 
+### 7. 缓冲流
 
+```
+BufferedInputStream
+BufferedOutputSteam
+BufferedReader
+BufferedWriter
+```
 
+==缓冲流使用要先套接到已有的"流"之上==
+
+```java
+BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File("Interview//IO//testimg.jpg")));
+```
+
+如果使用`BufferedReader`和`BufferedWriter`,可以使用String进行读取。
+
+开发会优先使用缓冲流， 因为==缓冲流内部提供了缓冲区== ，速度会快很多。
+
+```java
+public static void TestBufferStream() throws IOException {
+    /*非文本文件的复制*/
+    BufferedInputStream bis = null;
+    BufferedOutputStream bos = null;
+    try {
+        // 造文件
+        File srcFile = new File("Interview//IO//testimg.jpg");
+        File destFile = new File("Interview//IO//CopyIMG.jpg");
+        // 造节点流
+        FileInputStream fis = new FileInputStream(srcFile);
+        FileOutputStream fos = new FileOutputStream(destFile);
+        // 造缓冲流
+        bis = new BufferedInputStream(fis);
+        bos = new BufferedOutputStream(fos);
+        // 简写
+        // bis = new BufferedInputStream(new FileInputStream(new File("Interview//IO//testimg" +
+        //                    ".jpg")));
+        // bos = new BufferedOutputStream(new FileOutputStream(new File("Interview//IO//CopyIMG" +
+        //                    ".jpg")));
+
+        byte[] buffer = new byte[10];
+        int len;
+        while ((len = bis.read(buffer)) != -1) {
+            bos.write(buffer, 0, len);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    } finally {
+        // 资源关闭
+        // 先关外层的流,再关内层的流
+        bis.close();
+        bos.close();
+        // 其实,关闭外层流时,会自动关闭内层流,也就是说下面的内层的流可以省略
+        // fis.close();
+        // fos.close();
+    }
+}
+```
+
+###  8. 统计一个文件中字符出现次数
+
+```java
+// 统计 comment.txt中每个字符出现的次数
+public static void wordCount() throws IOException {
+    BufferedReader br = new BufferedReader(new FileReader(new File("Interview//IO//comment.txt")));
+    BufferedWriter bw = new BufferedWriter(new FileWriter(new File("Interview//IO//commentCount.txt")));
+    HashMap<Character, Integer> hashMap = new HashMap<>();
+    int ch;
+    while ((ch = br.read()) != -1) {
+        char c = (char) ch;
+        hashMap.put(c, hashMap.getOrDefault(c, 0) + 1);
+    }
+    br.close();
+    for (Map.Entry<Character, Integer> en : hashMap.entrySet()) {
+        char c = en.getKey();
+        switch (c){
+            case ' ':
+                bw.write("空格 = "+en.getValue());
+                break;
+            case '\t':
+                bw.write("tab = "+en.getValue());
+                break;
+            case '\r':
+                bw.write("回车 = "+en.getValue());
+                break;
+            case '\n':
+                bw.write("换行 = "+en.getValue());
+                break;
+            default:
+                bw.write(c+" = "+en.getValue());
+                break;
+        }
+        bw.newLine();
+    }
+    bw.close();
+}
+```
+
+### 9. 转换流
+
+==转换流提供了 字节流 到 字符流 的转换。==
+
+```
+/*
+ *  转换流:
+ *  InputStreamReader ： 将一个字节的输入流 转换为 字符 的输入流
+ *  OutputStreamWriter ：将一个字符的输出流 转换为 字节 的输出流
+ *  实现了 字节流 到 字符流之间的转换。
+ *
+ *  从 字节 --> 字符 是一种解码
+ *  从 字符 --> 字节 是一种编码
+ *
+ *  这个过程存在字符集的设置问题
+ * */
+```
+
+```java
+public static void main(String[] args) throws IOException {
+    /* 实现字节流到输入流的转换 */
+    FileInputStream fis = new FileInputStream("Interview//IO//comment.txt");
+    FileOutputStream fos = new FileOutputStream("Interview//IO//commentGBK.txt");
+    // 参数二指明字符集,根据读取的文件字符集来确定
+    InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+    OutputStreamWriter osw = new OutputStreamWriter(fos, "GBK");
+    char[] cbuf = new char[20];
+    int len;
+    while ((len = isr.read(cbuf)) !   = -1) {
+        String s = new String(cbuf, 0, len);
+        System.out.print(s);
+        osw.write(s);
+    }
+    isr.close();
+    osw.close();
+}
+```
 
 
 
